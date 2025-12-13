@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+set -vx
+
+bundle install
+
+if command -v go &> /dev/null; then
+  bundle exec rake go:build
+fi
+
+bundle exec rake compile

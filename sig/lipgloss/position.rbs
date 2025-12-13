@@ -1,0 +1,26 @@
+# Generated from lib/lipgloss/position.rb with RBS::Inline
+
+module Lipgloss
+  # Position constants for alignment
+  #
+  # Positions are represented as floats from 0.0 to 1.0:
+  # - 0.0 = top/left
+  # - 0.5 = center
+  # - 1.0 = bottom/right
+  module Position
+    # Top alignment (0.0)
+    TOP: ::Float
+
+    # Bottom alignment (1.0)
+    BOTTOM: ::Float
+
+    # Left alignment (0.0)
+    LEFT: ::Float
+
+    # Right alignment (1.0)
+    RIGHT: ::Float
+
+    # Center alignment (0.5)
+    CENTER: ::Float
+  end
+end

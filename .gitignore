@@ -1,0 +1,35 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/vendor/bundle/
+
+# C extension build artifacts
+*.o
+*.so
+*.bundle
+*.bundle.dSYM
+*.dll
+Makefile
+mkmf.log
+
+# Go build artifacts
+go/build/
+go/lipgloss.h
+
+# IDE
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gem
+*.gem

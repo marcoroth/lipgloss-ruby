@@ -1,0 +1,103 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/lipgloss"
+
+puts "=== Lipgloss Colors Demo ==="
+puts
+
+puts "Simple Hex Colors:"
+red = Lipgloss::Style.new.foreground("#FF0000")
+green = Lipgloss::Style.new.foreground("#00FF00")
+blue = Lipgloss::Style.new.foreground("#0000FF")
+
+puts red.render("Red text")
+puts green.render("Green text")
+puts blue.render("Blue text")
+puts
+
+puts "Adaptive Colors (changes based on terminal background):"
+adaptive = Lipgloss::AdaptiveColor.new(
+  light: "#000000",
+  dark: "#FFFFFF"
+)
+style = Lipgloss::Style.new.foreground(adaptive)
+puts style.render("This text adapts to your terminal background")
+puts
+
+puts "Complete Colors (fallbacks for different terminal capabilities):"
+complete = Lipgloss::CompleteColor.new(
+  true_color: "#FF6B6B",
+  ansi256: "196",
+  ansi: "9"
+)
+complete_style = Lipgloss::Style.new.foreground(complete)
+puts complete_style.render("Coral red with fallbacks")
+
+complete_blue = Lipgloss::CompleteColor.new(
+  true_color: "#4ECDC4",
+  ansi256: "80",
+  ansi: "6"
+)
+blue_style = Lipgloss::Style.new.foreground(complete_blue)
+puts blue_style.render("Teal with fallbacks")
+puts
+
+puts "Complete Adaptive Colors (best of both worlds):"
+
+complete_adaptive = Lipgloss::CompleteAdaptiveColor.new(
+  light: Lipgloss::CompleteColor.new(
+    true_color: "#1A1A2E",
+    ansi256: "234",
+    ansi: "0"
+  ),
+  dark: Lipgloss::CompleteColor.new(
+    true_color: "#EAEAEA",
+    ansi256: "255",
+    ansi: "15"
+  )
+)
+
+complete_adaptive_style = Lipgloss::Style.new.foreground(complete_adaptive)
+puts complete_adaptive_style.render("Adapts + has fallbacks for all terminal types")
+puts
+
+puts "Background Colors:"
+bg_style = Lipgloss::Style.new
+                          .foreground("#FFFFFF")
+                          .background("#7D56F4")
+                          .padding(0, 1)
+
+puts bg_style.render("Purple background")
+puts
+
+puts "Combined Styling:"
+
+foreground_color = Lipgloss::CompleteColor.new(
+  true_color: "#FFD700",
+  ansi256: "220",
+  ansi: "11"
+)
+
+background_color = Lipgloss::CompleteColor.new(
+  true_color: "#2D2D2D",
+  ansi256: "236",
+  ansi: "0"
+)
+
+fancy = Lipgloss::Style.new
+                       .bold(true)
+                       .foreground(foreground_color)
+                       .background(background_color)
+                       .padding(0, 2)
+
+puts fancy.render("Gold on Dark Gray")
+puts
+
+puts "Terminal Detection:"
+
+if Lipgloss.has_dark_background?
+  puts "Your terminal has a DARK background"
+else
+  puts "Your terminal has a LIGHT background"
+end

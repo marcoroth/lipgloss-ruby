@@ -1,0 +1,108 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/lipgloss"
+
+puts "=== Lipgloss Tree Demo ==="
+puts
+
+# Basic tree
+puts "Basic Tree:"
+tree = Lipgloss::Tree.root("Project")
+                     .child("README.md", "Gemfile", "Rakefile")
+puts tree.render
+puts
+
+# Tree with nested structure
+puts "Nested Project Structure:"
+lib = Lipgloss::Tree.root("lib")
+                    .child("lipgloss.rb")
+                    .child(
+                      Lipgloss::Tree.root("lipgloss")
+                        .child("version.rb", "style.rb", "border.rb", "color.rb")
+                    )
+
+test = Lipgloss::Tree.root("test")
+                     .child("test_helper.rb", "style_test.rb", "layout_test.rb")
+
+project = Lipgloss::Tree.root("lipgloss-ruby")
+                        .child(lib, test, "README.md", "Gemfile", "lipgloss.gemspec")
+
+puts project.render
+puts
+
+# Default enumerator (sharp corners)
+puts "Default Enumerator (Sharp Corners):"
+default_tree = Lipgloss::Tree.root("Root")
+                             .child("Branch A", "Branch B", "Branch C")
+                             .enumerator(:default)
+puts default_tree.render
+puts
+
+# Rounded enumerator
+puts "Rounded Enumerator:"
+rounded_tree = Lipgloss::Tree.root("Root")
+                             .child("Branch A", "Branch B", "Branch C")
+                             .enumerator(:rounded)
+puts rounded_tree.render
+puts
+
+# Styled tree
+puts "Styled Tree:"
+root_style = Lipgloss::Style.new.bold(true).foreground("#FFD700")
+item_style = Lipgloss::Style.new.foreground("#98FB98")
+enum_style = Lipgloss::Style.new.foreground("#87CEEB")
+
+styled_tree = Lipgloss::Tree.root("Styled Root")
+                            .child("Item 1", "Item 2", "Item 3")
+                            .root_style(root_style)
+                            .item_style(item_style)
+                            .enumerator_style(enum_style)
+
+puts styled_tree.render
+puts
+
+# File system example
+puts "File System Example:"
+docs = Lipgloss::Tree.root("docs/")
+                     .child("getting-started.md", "api-reference.md", "changelog.md")
+
+src = Lipgloss::Tree.root("src/")
+                    .child(
+                      Lipgloss::Tree.root("components/")
+                        .child("Button.tsx", "Input.tsx", "Modal.tsx"),
+                      Lipgloss::Tree.root("utils/")
+                        .child("helpers.ts", "constants.ts"),
+                      "index.ts"
+                    )
+
+tests = Lipgloss::Tree.root("tests/")
+                      .child("unit/", "integration/", "e2e/")
+
+filesystem = Lipgloss::Tree.root("my-app/")
+                           .child(docs, src, tests, "package.json", "tsconfig.json", ".gitignore")
+                           .enumerator(:rounded)
+
+puts filesystem.render
+puts
+
+# Building a tree with children method
+puts "Using children method:"
+simple = Lipgloss::Tree.root("Languages")
+                       .children(["Ruby", "Python", "JavaScript", "Go", "Rust"])
+puts simple.render
+puts
+
+# Mixed tree with subtrees
+puts "Organization Chart:"
+engineering = Lipgloss::Tree.root("Engineering")
+                            .child("Backend Team", "Frontend Team", "DevOps Team")
+
+sales = Lipgloss::Tree.root("Sales")
+                      .child("North America", "Europe", "Asia Pacific")
+
+org = Lipgloss::Tree.root("Acme Corp")
+                    .child(engineering, sales, "HR", "Finance")
+                    .enumerator(:rounded)
+
+puts org.render

@@ -1,0 +1,48 @@
+# Generated from lib/lipgloss/border.rb with RBS::Inline
+
+module Lipgloss
+  module Border
+    # Standard border with normal weight and 90 degree corners
+    #   ┌───┐
+    #   │   │
+    #   └───┘
+    NORMAL: ::Symbol
+
+    # Border with rounded corners
+    #   ╭───╮
+    #   │   │
+    #   ╰───╯
+    ROUNDED: ::Symbol
+
+    # Thicker border
+    #   ┏━━━┓
+    #   ┃   ┃
+    #   ┗━━━┛
+    THICK: ::Symbol
+
+    # Double-line border
+    #   ╔═══╗
+    #   ║   ║
+    #   ╚═══╝
+    DOUBLE: ::Symbol
+
+    # ASCII border (compatible with all terminals)
+    #   +---+
+    #   |   |
+    #   +---+
+    ASCII: ::Symbol
+
+    # Hidden border (spaces, maintains layout)
+    HIDDEN: ::Symbol
+
+    # Block border (full blocks)
+    #   ████
+    #   █  █
+    #   ████
+    BLOCK: ::Symbol
+
+    OUTER_HALF_BLOCK: ::Symbol
+
+    INNER_HALF_BLOCK: ::Symbol
+  end
+end

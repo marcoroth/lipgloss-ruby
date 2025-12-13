@@ -1,0 +1,168 @@
+# Signatures for the C extension (ext/lipgloss/extension.c)
+
+module Lipgloss
+  def self.join_horizontal: (Float position, Array[String] strings) -> String
+  def self.join_vertical: (Float position, Array[String] strings) -> String
+  def self.width: (String string) -> Integer
+  def self.height: (String string) -> Integer
+  def self.size: (String string) -> [Integer, Integer]
+  def self.place: (Integer width, Integer height, Float horizontal_position, Float vertical_position, String string) -> String
+  def self.place_horizontal: (Integer width, Float position, String string) -> String
+  def self.place_vertical: (Integer height, Float position, String string) -> String
+  def self.has_dark_background?: () -> bool
+  def self.upstream_version: () -> String
+  def self.version: () -> String
+
+  class Style
+    def initialize: () -> void
+    def render: (String string) -> String
+    def to_s: () -> String
+
+    def bold: (bool value) -> Style
+    def italic: (bool value) -> Style
+    def underline: (bool value) -> Style
+    def strikethrough: (bool value) -> Style
+    def reverse: (bool value) -> Style
+    def blink: (bool value) -> Style
+    def faint: (bool value) -> Style
+
+    def foreground: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color) -> Style
+    def background: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color) -> Style
+    def margin_background: (String color) -> Style
+
+    def width: (Integer width) -> Style
+    def height: (Integer height) -> Style
+    def max_width: (Integer width) -> Style
+    def max_height: (Integer height) -> Style
+
+    def padding: (*Integer values) -> Style
+    def padding_top: (Integer value) -> Style
+    def padding_right: (Integer value) -> Style
+    def padding_bottom: (Integer value) -> Style
+    def padding_left: (Integer value) -> Style
+
+    def margin: (*Integer values) -> Style
+    def margin_top: (Integer value) -> Style
+    def margin_right: (Integer value) -> Style
+    def margin_bottom: (Integer value) -> Style
+    def margin_left: (Integer value) -> Style
+
+    def border: (Symbol border_type, *bool sides) -> Style
+    def border_style: (Symbol border_type) -> Style
+    def border_foreground: (String color) -> Style
+    def border_background: (String color) -> Style
+    def border_top: (bool value) -> Style
+    def border_right: (bool value) -> Style
+    def border_bottom: (bool value) -> Style
+    def border_left: (bool value) -> Style
+
+    def border_top_foreground: (String color) -> Style
+    def border_right_foreground: (String color) -> Style
+    def border_bottom_foreground: (String color) -> Style
+    def border_left_foreground: (String color) -> Style
+    def border_top_background: (String color) -> Style
+    def border_right_background: (String color) -> Style
+    def border_bottom_background: (String color) -> Style
+    def border_left_background: (String color) -> Style
+
+    def border_custom: (
+      ?top: String,
+      ?bottom: String,
+      ?left: String,
+      ?right: String,
+      ?top_left: String,
+      ?top_right: String,
+      ?bottom_left: String,
+      ?bottom_right: String,
+      ?middle_left: String,
+      ?middle_right: String,
+      ?middle: String,
+      ?middle_top: String,
+      ?middle_bottom: String
+    ) -> Style
+
+    def align: (*Float positions) -> Style
+    def align_horizontal: (Float position) -> Style
+    def align_vertical: (Float position) -> Style
+
+    def inline: (bool value) -> Style
+    def tab_width: (Integer width) -> Style
+    def underline_spaces: (bool value) -> Style
+    def strikethrough_spaces: (bool value) -> Style
+
+    def set_string: (String string) -> Style
+    def inherit: (Style other) -> Style
+
+    def unset_bold: () -> Style
+    def unset_italic: () -> Style
+    def unset_underline: () -> Style
+    def unset_strikethrough: () -> Style
+    def unset_reverse: () -> Style
+    def unset_blink: () -> Style
+    def unset_faint: () -> Style
+    def unset_foreground: () -> Style
+    def unset_background: () -> Style
+    def unset_width: () -> Style
+    def unset_height: () -> Style
+    def unset_padding_top: () -> Style
+    def unset_padding_right: () -> Style
+    def unset_padding_bottom: () -> Style
+    def unset_padding_left: () -> Style
+    def unset_margin_top: () -> Style
+    def unset_margin_right: () -> Style
+    def unset_margin_bottom: () -> Style
+    def unset_margin_left: () -> Style
+    def unset_border_style: () -> Style
+    def unset_inline: () -> Style
+  end
+
+  class Table
+    def initialize: () -> void
+    def headers: (Array[String] headers) -> Table
+    def row: (Array[String] row) -> Table
+    def rows: (Array[Array[String]] rows) -> Table
+    def border: (Symbol border_type) -> Table
+    def border_style: (Style style) -> Table
+    def border_top: (bool value) -> Table
+    def border_bottom: (bool value) -> Table
+    def border_left: (bool value) -> Table
+    def border_right: (bool value) -> Table
+    def border_header: (bool value) -> Table
+    def border_column: (bool value) -> Table
+    def border_row: (bool value) -> Table
+    def width: (Integer width) -> Table
+    def height: (Integer height) -> Table
+    def offset: (Integer offset) -> Table
+    def wrap: (bool value) -> Table
+    def clear_rows: () -> Table
+    def render: () -> String
+    def to_s: () -> String
+    def _style_func_map: (Hash[String, Style] style_map) -> Table
+  end
+
+  class List
+    def initialize: (*String items) -> void
+    def item: (String | List item) -> List
+    def items: (Array[String] items) -> List
+    def enumerator: (Symbol enum_type) -> List
+    def enumerator_style: (Style style) -> List
+    def item_style: (Style style) -> List
+    def render: () -> String
+    def to_s: () -> String
+  end
+
+  class Tree
+    def initialize: (?String root) -> void
+    def self.root: (String root) -> Tree
+    def root=: (String root) -> Tree
+    def child: (*(String | Tree) children) -> Tree
+    def children: (Array[String] children) -> Tree
+    def enumerator: (Symbol enum_type) -> Tree
+    def enumerator_style: (Style style) -> Tree
+    def item_style: (Style style) -> Tree
+    def root_style: (Style style) -> Tree
+    def offset: (Integer start, Integer end) -> Tree
+    def render: () -> String
+    def to_s: () -> String
+  end
+end

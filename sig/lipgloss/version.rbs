@@ -1,0 +1,5 @@
+# Generated from lib/lipgloss/version.rb with RBS::Inline
+
+module Lipgloss
+  VERSION: String
+end

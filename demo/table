@@ -1,0 +1,140 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/lipgloss"
+
+puts "=== Lipgloss Table Demo ==="
+puts
+
+puts "Basic Table:"
+
+data = [
+  ["Chinese", "您好", "你好"],
+  ["Japanese", "こんにちは", "やあ"],
+  ["Korean", "안녕하세요", "안녕"],
+  ["Spanish", "Buenos días", "Hola"]
+]
+
+table = Lipgloss::Table.new
+                       .headers(["Language", "Formal", "Informal"])
+                       .rows(data)
+                       .border(:rounded)
+
+puts table.render
+puts
+
+puts "Styled Border Table:"
+border_style = Lipgloss::Style.new.foreground("#874BFD")
+
+data = [
+  ["Alice", "25", "New York"],
+  ["Bob", "30", "Los Angeles"],
+  ["Charlie", "35", "Chicago"]
+]
+
+styled_table = Lipgloss::Table.new
+                              .headers(["Name", "Age", "City"])
+                              .rows(data)
+                              .border(:rounded)
+                              .border_style(border_style)
+
+puts styled_table.render
+puts
+
+puts "Fixed Width Table:"
+
+data = [
+  ["Widget", "A small gadget"],
+  ["Gizmo", "A useful tool"]
+]
+
+wide_table = Lipgloss::Table.new
+                            .headers(["Item", "Description"])
+                            .rows(data)
+                            .border(:normal)
+                            .width(50)
+
+puts wide_table.render
+puts
+
+puts "Border Style Comparison:"
+[:normal, :rounded, :thick, :double, :ascii].each do |style|
+  t = Lipgloss::Table.new
+                     .headers([style.to_s])
+                     .rows([["content"]])
+                     .border(style)
+  puts t.render
+  puts
+end
+
+# Markdown table
+puts "Markdown Table (for documentation):"
+md_table = Lipgloss::Table.new
+                          .headers(["Feature", "Status"])
+                          .rows([
+                                  ["Tables", "Done"],
+                                  ["Lists", "Done"],
+                                  ["Trees", "Done"]
+                                ])
+                          .border(:markdown)
+                          .border_top(false)
+                          .border_bottom(false)
+
+puts md_table.render
+puts
+
+puts "StyleFunc - Alternating Row Colors:"
+header_style = Lipgloss::Style.new.bold(true).foreground("#FFFFFF").background("#5A56E0")
+even_style = Lipgloss::Style.new.foreground("#FAFAFA").background("#3C3C3C")
+odd_style = Lipgloss::Style.new.foreground("#FAFAFA").background("#4A4A4A")
+
+data = [
+  ["Alice", "Engineer", "Backend"],
+  ["Bob", "Designer", "UX"],
+  ["Charlie", "Manager", "Engineering"],
+  ["Diana", "Engineer", "Frontend"]
+]
+
+styled_table = Lipgloss::Table.new
+                              .headers(["Name", "Role", "Department"])
+                              .rows(data)
+                              .border(:rounded)
+                              .style_func(rows: 4, columns: 3) do |row, _col|
+  if row == Lipgloss::Table::HEADER_ROW
+    header_style
+  elsif row.even?
+    even_style
+  else
+    odd_style
+  end
+end
+
+puts styled_table.render
+puts
+
+puts "StyleFunc - Column-Specific Styling:"
+name_style = Lipgloss::Style.new.bold(true).foreground("#FF6B6B")
+value_style = Lipgloss::Style.new.foreground("#4ECDC4")
+
+data = [
+  ["Debug Mode", "enabled"],
+  ["Log Level", "info"],
+  ["Max Connections", "100"]
+]
+
+config_table = Lipgloss::Table.new
+                              .headers(["Setting", "Value"])
+                              .rows(data)
+                              .border(:rounded)
+                              .style_func(rows: 3, columns: 2) do |row, col|
+  if row == Lipgloss::Table::HEADER_ROW
+    Lipgloss::Style.new.bold(true)
+  elsif col.zero?
+    name_style
+  else
+    value_style
+  end
+end
+
+puts config_table.render
+puts

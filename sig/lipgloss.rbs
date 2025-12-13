@@ -1,0 +1,29 @@
+# Generated from lib/lipgloss.rb with RBS::Inline
+
+module Lipgloss
+  TOP: Float
+
+  BOTTOM: Float
+
+  LEFT: Float
+
+  RIGHT: Float
+
+  CENTER: Float
+
+  NORMAL_BORDER: Symbol
+
+  ROUNDED_BORDER: Symbol
+
+  THICK_BORDER: Symbol
+
+  DOUBLE_BORDER: Symbol
+
+  HIDDEN_BORDER: Symbol
+
+  BLOCK_BORDER: Symbol
+
+  ASCII_BORDER: Symbol
+
+  NO_TAB_CONVERSION: Integer
+end

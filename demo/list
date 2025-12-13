@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/lipgloss"
+
+puts "=== Lipgloss List Demo ==="
+puts
+
+puts "Bullet List:"
+bullet_list = Lipgloss::List.new("Apple", "Banana", "Cherry", "Date").enumerator(:bullet)
+puts bullet_list.render
+puts
+
+puts "Numbered List (Arabic):"
+numbered = Lipgloss::List.new("First item", "Second item", "Third item").enumerator(:arabic)
+puts numbered.render
+puts
+
+puts "Alphabetical List:"
+alpha = Lipgloss::List.new("Alpha", "Bravo", "Charlie", "Delta").enumerator(:alphabet)
+puts alpha.render
+puts
+
+puts "Roman Numeral List:"
+roman = Lipgloss::List.new("Introduction", "Methods", "Results", "Discussion", "Conclusion").enumerator(:roman)
+puts roman.render
+puts
+
+puts "Dash List:"
+dash = Lipgloss::List.new("Point one", "Point two", "Point three").enumerator(:dash)
+puts dash.render
+puts
+
+puts "Asterisk List:"
+asterisk = Lipgloss::List.new("Item A", "Item B", "Item C").enumerator(:asterisk)
+puts asterisk.render
+puts
+
+puts "Nested List:"
+fruits = Lipgloss::List.new("Apple", "Banana", "Orange").enumerator(:bullet)
+vegetables = Lipgloss::List.new("Carrot", "Broccoli", "Spinach").enumerator(:bullet)
+
+groceries = Lipgloss::List.new
+                          .item("Fruits")
+                          .item(fruits)
+                          .item("Vegetables")
+                          .item(vegetables)
+                          .enumerator(:arabic)
+
+puts groceries.render
+puts
+
+puts "Styled List:"
+enum_style = Lipgloss::Style.new.foreground("#FF6B6B").bold(true)
+item_style = Lipgloss::Style.new.foreground("#4ECDC4")
+
+styled_list = Lipgloss::List.new("Ruby", "Python", "JavaScript", "Go")
+                            .enumerator(:arabic)
+                            .enumerator_style(enum_style)
+                            .item_style(item_style)
+
+puts styled_list.render
+puts
+
+puts "Building List Incrementally:"
+todo = Lipgloss::List.new
+                     .item("Write code")
+                     .item("Test code")
+                     .item("Deploy code")
+                     .item("Monitor")
+                     .enumerator(:bullet)
+
+puts todo.render
+puts
