@@ -176,6 +176,7 @@ __attribute__((__visibility__("default"))) void Init_lipgloss(void) {
   Init_lipgloss_table();
   Init_lipgloss_list();
   Init_lipgloss_tree();
+  Init_lipgloss_color();
 
   rb_define_singleton_method(mLipgloss, "join_horizontal", lipgloss_join_horizontal_rb, 2);
   rb_define_singleton_method(mLipgloss, "join_vertical", lipgloss_join_vertical_rb, 2);

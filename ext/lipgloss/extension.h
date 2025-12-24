@@ -68,6 +68,7 @@ void Init_lipgloss_style(void);
 void Init_lipgloss_table(void);
 void Init_lipgloss_list(void);
 void Init_lipgloss_tree(void);
+void Init_lipgloss_color(void);
 
 void register_style_spacing_methods(void);
 void register_style_border_methods(void);
