@@ -73,4 +73,6 @@ void register_style_spacing_methods(void);
 void register_style_border_methods(void);
 void register_style_unset_methods(void);
 
+int is_adaptive_color(VALUE object);
+
 #endif

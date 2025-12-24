@@ -103,10 +103,6 @@ static int is_complete_color(VALUE obj) {
   return rb_respond_to(obj, rb_intern("true_color")) && rb_respond_to(obj, rb_intern("ansi256")) && rb_respond_to(obj, rb_intern("ansi"));
 }
 
-static int is_adaptive_color(VALUE obj) {
-  return rb_respond_to(obj, rb_intern("light")) && rb_respond_to(obj, rb_intern("dark"));
-}
-
 // Color methods
 
 static VALUE style_foreground(VALUE self, VALUE color) {

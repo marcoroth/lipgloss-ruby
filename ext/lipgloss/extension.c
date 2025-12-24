@@ -6,6 +6,10 @@ VALUE cTable;
 VALUE cList;
 VALUE cTree;
 
+int is_adaptive_color(VALUE object) {
+  return rb_respond_to(object, rb_intern("light")) && rb_respond_to(object, rb_intern("dark"));
+}
+
 static VALUE lipgloss_join_horizontal_rb(VALUE self, VALUE position, VALUE strings) {
   Check_Type(strings, T_ARRAY);
 

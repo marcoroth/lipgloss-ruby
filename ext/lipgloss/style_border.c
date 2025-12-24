@@ -50,6 +50,20 @@ static VALUE style_border_style(VALUE self, VALUE border_sym) {
 
 static VALUE style_border_foreground(VALUE self, VALUE color) {
   GET_STYLE(self, style);
+
+  if (is_adaptive_color(color)) {
+    VALUE light = rb_funcall(color, rb_intern("light"), 0);
+    VALUE dark = rb_funcall(color, rb_intern("dark"), 0);
+
+    unsigned long long new_handle = lipgloss_style_border_foreground_adaptive(
+      style->handle,
+      StringValueCStr(light),
+      StringValueCStr(dark)
+    );
+
+    return style_wrap(rb_class_of(self), new_handle);
+  }
+
   Check_Type(color, T_STRING);
   unsigned long long new_handle = lipgloss_style_border_foreground(style->handle, StringValueCStr(color));
   return style_wrap(rb_class_of(self), new_handle);
@@ -57,6 +71,20 @@ static VALUE style_border_foreground(VALUE self, VALUE color) {
 
 static VALUE style_border_background(VALUE self, VALUE color) {
   GET_STYLE(self, style);
+
+  if (is_adaptive_color(color)) {
+    VALUE light = rb_funcall(color, rb_intern("light"), 0);
+    VALUE dark = rb_funcall(color, rb_intern("dark"), 0);
+
+    unsigned long long new_handle = lipgloss_style_border_background_adaptive(
+      style->handle,
+      StringValueCStr(light),
+      StringValueCStr(dark)
+    );
+
+    return style_wrap(rb_class_of(self), new_handle);
+  }
+
   Check_Type(color, T_STRING);
   unsigned long long new_handle = lipgloss_style_border_background(style->handle, StringValueCStr(color));
   return style_wrap(rb_class_of(self), new_handle);
