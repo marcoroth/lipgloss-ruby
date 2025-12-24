@@ -1,0 +1,17 @@
+# Generated from lib/lipgloss/style.rb with RBS::Inline
+
+module Lipgloss
+  class Style
+    # @rbs *positions: Position::position_value
+    # @rbs return: Style
+    def align: (*Position::position_value positions) -> Style
+
+    # @rbs position: Position::position_value
+    # @rbs return: Style
+    def align_horizontal: (Position::position_value position) -> Style
+
+    # @rbs position: Position::position_value
+    # @rbs return: Style
+    def align_vertical: (Position::position_value position) -> Style
+  end
+end

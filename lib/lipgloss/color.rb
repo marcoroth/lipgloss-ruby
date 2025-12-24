@@ -8,6 +8,10 @@ module Lipgloss
   #   type complete_adaptive_color_hash = { light: complete_color_hash, dark: complete_color_hash }
 
   module ANSIColor
+    # @rbs!
+    #   type ansi_color_symbol = :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white | :bright_black | :bright_red | :bright_green | :bright_yellow | :bright_blue | :bright_magenta | :bright_cyan | :bright_white
+    #   type ansi_color_value = ansi_color_symbol | Symbol | String | Integer
+
     COLORS = {
       black: "0",
       red: "1",
@@ -25,8 +29,10 @@ module Lipgloss
       bright_magenta: "13",
       bright_cyan: "14",
       bright_white: "15"
-    }.freeze
+    }.freeze #: Hash[Symbol, String]
 
+    # @rbs value: ansi_color_value
+    # @rbs return: String
     def self.resolve(value)
       case value
       when Symbol then COLORS.fetch(value) { raise ArgumentError, "Unknown ANSI color: #{value.inspect}" }
@@ -81,8 +87,8 @@ module Lipgloss
     attr_reader :ansi #: String
 
     # @rbs true_color: String -- 24-bit color (e.g., "#0000FF")
-    # @rbs ansi256: String | Integer | Symbol -- 8-bit ANSI color (0-255, or symbol for 0-15)
-    # @rbs ansi: String | Integer | Symbol -- 4-bit ANSI color (:red, :blue, etc., or 0-15)
+    # @rbs ansi256: ANSIColor::ansi_color_value -- 8-bit ANSI color (0-255, or symbol for 0-15)
+    # @rbs ansi: ANSIColor::ansi_color_value -- 4-bit ANSI color (:red, :blue, etc., or 0-15)
     # @rbs return: void
     def initialize(true_color:, ansi256:, ansi:)
       @true_color = true_color

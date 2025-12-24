@@ -24,14 +24,20 @@ module Lipgloss
     # Center alignment (0.5)
     CENTER = 0.5
 
+    # @rbs!
+    #   type position_symbol = :top | :bottom | :left | :right | :center
+    #   type position_value = position_symbol | Symbol | String | Integer | Float
+
     SYMBOLS = {
       top: TOP,
       bottom: BOTTOM,
       left: LEFT,
       right: RIGHT,
       center: CENTER
-    }.freeze
+    }.freeze #: Hash[Symbol, Float]
 
+    # @rbs value: position_value
+    # @rbs return: Float
     def self.resolve(value)
       case value
       when Symbol then SYMBOLS.fetch(value) { raise ArgumentError, "Unknown position: #{value.inspect}" }

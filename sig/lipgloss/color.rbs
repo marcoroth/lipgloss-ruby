@@ -8,9 +8,15 @@ module Lipgloss
   type complete_adaptive_color_hash = { light: complete_color_hash, dark: complete_color_hash }
 
   module ANSIColor
-    COLORS: untyped
+    type ansi_color_symbol = :black | :red | :green | :yellow | :blue | :magenta | :cyan | :white | :bright_black | :bright_red | :bright_green | :bright_yellow | :bright_blue | :bright_magenta | :bright_cyan | :bright_white
 
-    def self.resolve: (untyped value) -> untyped
+    type ansi_color_value = ansi_color_symbol | Symbol | String | Integer
+
+    COLORS: Hash[Symbol, String]
+
+    # @rbs value: ansi_color_value
+    # @rbs return: String
+    def self.resolve: (ansi_color_value value) -> String
   end
 
   # Adaptive color that changes based on terminal background
@@ -58,10 +64,10 @@ module Lipgloss
     attr_reader ansi: String
 
     # @rbs true_color: String -- 24-bit color (e.g., "#0000FF")
-    # @rbs ansi256: String | Integer | Symbol -- 8-bit ANSI color (0-255, or symbol for 0-15)
-    # @rbs ansi: String | Integer | Symbol -- 4-bit ANSI color (:red, :blue, etc., or 0-15)
+    # @rbs ansi256: ANSIColor::ansi_color_value -- 8-bit ANSI color (0-255, or symbol for 0-15)
+    # @rbs ansi: ANSIColor::ansi_color_value -- 4-bit ANSI color (:red, :blue, etc., or 0-15)
     # @rbs return: void
-    def initialize: (true_color: String, ansi256: String | Integer | Symbol, ansi: String | Integer | Symbol) -> void
+    def initialize: (true_color: String, ansi256: ANSIColor::ansi_color_value, ansi: ANSIColor::ansi_color_value) -> void
 
     # @rbs return: complete_color_hash
     def to_h: () -> complete_color_hash

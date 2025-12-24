@@ -26,4 +26,34 @@ module Lipgloss
   ASCII_BORDER: Symbol
 
   NO_TAB_CONVERSION: Integer
+
+  # @rbs position: Position::position_value
+  # @rbs *strings: String
+  # @rbs return: String
+  def self.join_horizontal: (Position::position_value position, *String strings) -> String
+
+  # @rbs position: Position::position_value
+  # @rbs *strings: String
+  # @rbs return: String
+  def self.join_vertical: (Position::position_value position, *String strings) -> String
+
+  # @rbs width: Integer
+  # @rbs height: Integer
+  # @rbs horizontal: Position::position_value
+  # @rbs vertical: Position::position_value
+  # @rbs string: String
+  # @rbs return: String
+  def self.place: (Integer width, Integer height, Position::position_value horizontal, Position::position_value vertical, String string, **untyped opts) -> String
+
+  # @rbs width: Integer
+  # @rbs position: Position::position_value
+  # @rbs string: String
+  # @rbs return: String
+  def self.place_horizontal: (Integer width, Position::position_value position, String string) -> String
+
+  # @rbs height: Integer
+  # @rbs position: Position::position_value
+  # @rbs string: String
+  # @rbs return: String
+  def self.place_vertical: (Integer height, Position::position_value position, String string) -> String
 end

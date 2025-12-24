@@ -22,5 +22,15 @@ module Lipgloss
 
     # Center alignment (0.5)
     CENTER: ::Float
+
+    type position_symbol = :top | :bottom | :left | :right | :center
+
+    type position_value = position_symbol | Symbol | String | Integer | Float
+
+    SYMBOLS: Hash[Symbol, Float]
+
+    # @rbs value: position_value
+    # @rbs return: Float
+    def self.resolve: (position_value value) -> Float
   end
 end

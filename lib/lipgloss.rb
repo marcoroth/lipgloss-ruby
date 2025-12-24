@@ -34,22 +34,42 @@ module Lipgloss
   NO_TAB_CONVERSION = -1 #: Integer
 
   class << self
+    # @rbs position: Position::position_value
+    # @rbs *strings: String
+    # @rbs return: String
     def join_horizontal(position, *strings)
       _join_horizontal(Position.resolve(position), strings)
     end
 
+    # @rbs position: Position::position_value
+    # @rbs *strings: String
+    # @rbs return: String
     def join_vertical(position, *strings)
       _join_vertical(Position.resolve(position), strings)
     end
 
+    # @rbs width: Integer
+    # @rbs height: Integer
+    # @rbs horizontal: Position::position_value
+    # @rbs vertical: Position::position_value
+    # @rbs string: String
+    # @rbs return: String
     def place(width, height, horizontal, vertical, string, **opts)
       _place(width, height, Position.resolve(horizontal), Position.resolve(vertical), string, **opts)
     end
 
+    # @rbs width: Integer
+    # @rbs position: Position::position_value
+    # @rbs string: String
+    # @rbs return: String
     def place_horizontal(width, position, string)
       _place_horizontal(width, Position.resolve(position), string)
     end
 
+    # @rbs height: Integer
+    # @rbs position: Position::position_value
+    # @rbs string: String
+    # @rbs return: String
     def place_vertical(height, position, string)
       _place_vertical(height, Position.resolve(position), string)
     end

@@ -1,14 +1,14 @@
 # Signatures for the C extension (ext/lipgloss/extension.c)
 
 module Lipgloss
-  def self.join_horizontal: (Float position, Array[String] strings) -> String
-  def self.join_vertical: (Float position, Array[String] strings) -> String
+  def self._join_horizontal: (Float position, Array[String] strings) -> String
+  def self._join_vertical: (Float position, Array[String] strings) -> String
   def self.width: (String string) -> Integer
   def self.height: (String string) -> Integer
   def self.size: (String string) -> [Integer, Integer]
-  def self.place: (Integer width, Integer height, Float horizontal_position, Float vertical_position, String string) -> String
-  def self.place_horizontal: (Integer width, Float position, String string) -> String
-  def self.place_vertical: (Integer height, Float position, String string) -> String
+  def self._place: (Integer width, Integer height, Float horizontal_position, Float vertical_position, String string, **untyped opts) -> String
+  def self._place_horizontal: (Integer width, Float position, String string) -> String
+  def self._place_vertical: (Integer height, Float position, String string) -> String
   def self.has_dark_background?: () -> bool
   def self.upstream_version: () -> String
   def self.version: () -> String
@@ -81,9 +81,9 @@ module Lipgloss
       ?middle_bottom: String
     ) -> Style
 
-    def align: (*Float positions) -> Style
-    def align_horizontal: (Float position) -> Style
-    def align_vertical: (Float position) -> Style
+    def _align: (*Float positions) -> Style
+    def _align_horizontal: (Float position) -> Style
+    def _align_vertical: (Float position) -> Style
 
     def inline: (bool value) -> Style
     def tab_width: (Integer width) -> Style
