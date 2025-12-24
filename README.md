@@ -157,18 +157,20 @@ style = Lipgloss::Style.new
 ```ruby
 color = Lipgloss::CompleteColor.new(
   true_color: "#FF6B6B",  # 24-bit color
-  ansi256: "196",          # 256-color fallback
-  ansi: "9"                # 16-color fallback
+  ansi256: 196,           # 256-color fallback (integer)
+  ansi: :bright_red       # 16-color fallback (symbol)
 )
 
 style = Lipgloss::Style.new.foreground(color)
 ```
 
+**ANSI color symbols:** `:black`, `:red`, `:green`, `:yellow`, `:blue`, `:magenta`, `:cyan`, `:white`, and bright variants (`:bright_red`, etc.)
+
 **Complete adaptive colors:**
 
 ```ruby
-light = Lipgloss::CompleteColor.new(true_color: "#000", ansi256: "0", ansi: "0")
-dark = Lipgloss::CompleteColor.new(true_color: "#FFF", ansi256: "15", ansi: "15")
+light = Lipgloss::CompleteColor.new(true_color: "#000", ansi256: :black, ansi: :black)
+dark = Lipgloss::CompleteColor.new(true_color: "#FFF", ansi256: :bright_white, ansi: :bright_white)
 color = Lipgloss::CompleteAdaptiveColor.new(light: light, dark: dark)
 
 style = Lipgloss::Style.new.foreground(color)

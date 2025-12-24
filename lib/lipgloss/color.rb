@@ -7,6 +7,36 @@ module Lipgloss
   #   type complete_color_hash = { true_color: String, ansi256: String, ansi: String }
   #   type complete_adaptive_color_hash = { light: complete_color_hash, dark: complete_color_hash }
 
+  module ANSIColor
+    COLORS = {
+      black: "0",
+      red: "1",
+      green: "2",
+      yellow: "3",
+      blue: "4",
+      magenta: "5",
+      cyan: "6",
+      white: "7",
+      bright_black: "8",
+      bright_red: "9",
+      bright_green: "10",
+      bright_yellow: "11",
+      bright_blue: "12",
+      bright_magenta: "13",
+      bright_cyan: "14",
+      bright_white: "15"
+    }.freeze
+
+    def self.resolve(value)
+      case value
+      when Symbol then COLORS.fetch(value) { raise ArgumentError, "Unknown ANSI color: #{value.inspect}" }
+      when String then value
+      when Integer then value.to_s
+      else raise ArgumentError, "ANSI color must be a Symbol, String, or Integer, got #{value.class}"
+      end
+    end
+  end
+
   # Adaptive color that changes based on terminal background
   #
   # @example
@@ -38,8 +68,8 @@ module Lipgloss
   # @example
   #   color = Lipgloss::CompleteColor.new(
   #     true_color: "#0000FF",
-  #     ansi256: "21",
-  #     ansi: "4"
+  #     ansi256: 21,
+  #     ansi: :blue
   #   )
   class CompleteColor
     # @rbs @true_color: String
@@ -51,13 +81,13 @@ module Lipgloss
     attr_reader :ansi #: String
 
     # @rbs true_color: String -- 24-bit color (e.g., "#0000FF")
-    # @rbs ansi256: String -- 8-bit ANSI color (e.g., "21")
-    # @rbs ansi: String -- 4-bit ANSI color (e.g., "4")
+    # @rbs ansi256: String | Integer | Symbol -- 8-bit ANSI color (0-255, or symbol for 0-15)
+    # @rbs ansi: String | Integer | Symbol -- 4-bit ANSI color (:red, :blue, etc., or 0-15)
     # @rbs return: void
     def initialize(true_color:, ansi256:, ansi:)
       @true_color = true_color
-      @ansi256 = ansi256
-      @ansi = ansi
+      @ansi256 = ANSIColor.resolve(ansi256)
+      @ansi = ANSIColor.resolve(ansi)
     end
 
     # @rbs return: complete_color_hash
@@ -71,8 +101,8 @@ module Lipgloss
   #
   # @example
   #   color = Lipgloss::CompleteAdaptiveColor.new(
-  #     light: Lipgloss::CompleteColor.new(true_color: "#000", ansi256: "0", ansi: "0"),
-  #     dark: Lipgloss::CompleteColor.new(true_color: "#FFF", ansi256: "15", ansi: "15")
+  #     light: Lipgloss::CompleteColor.new(true_color: "#000", ansi256: :black, ansi: :black),
+  #     dark: Lipgloss::CompleteColor.new(true_color: "#FFF", ansi256: :bright_white, ansi: :bright_white)
   #   )
   class CompleteAdaptiveColor
     # @rbs @light: CompleteColor
