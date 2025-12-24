@@ -57,18 +57,55 @@ static VALUE lipgloss_size_rb(VALUE self, VALUE string) {
 }
 
 static VALUE lipgloss_place_rb(int argc, VALUE *argv, VALUE self) {
-  VALUE width, height, horizontal_position, vertical_position, string;
-  rb_scan_args(argc, argv, "5", &width, &height, &horizontal_position, &vertical_position, &string);
+  VALUE width, height, horizontal_position, vertical_position, string, opts;
+  rb_scan_args(argc, argv, "5:", &width, &height, &horizontal_position, &vertical_position, &string, &opts);
 
   Check_Type(string, T_STRING);
 
-  char *result = lipgloss_place(
-    NUM2INT(width),
-    NUM2INT(height),
-    NUM2DBL(horizontal_position),
-    NUM2DBL(vertical_position),
-    StringValueCStr(string)
-  );
+  char *result;
+
+  if (!NIL_P(opts)) {
+    VALUE whitespace_chars = rb_hash_aref(opts, ID2SYM(rb_intern("whitespace_chars")));
+    VALUE whitespace_foreground = rb_hash_aref(opts, ID2SYM(rb_intern("whitespace_foreground")));
+
+    const char *ws_chars = NIL_P(whitespace_chars) ? "" : StringValueCStr(whitespace_chars);
+
+    if (!NIL_P(whitespace_foreground) && is_adaptive_color(whitespace_foreground)) {
+      VALUE light = rb_funcall(whitespace_foreground, rb_intern("light"), 0);
+      VALUE dark = rb_funcall(whitespace_foreground, rb_intern("dark"), 0);
+
+      result = lipgloss_place_with_whitespace_adaptive(
+        NUM2INT(width),
+        NUM2INT(height),
+        NUM2DBL(horizontal_position),
+        NUM2DBL(vertical_position),
+        StringValueCStr(string),
+        ws_chars,
+        StringValueCStr(light),
+        StringValueCStr(dark)
+      );
+    } else {
+      const char *ws_fg = NIL_P(whitespace_foreground) ? "" : StringValueCStr(whitespace_foreground);
+
+      result = lipgloss_place_with_whitespace(
+        NUM2INT(width),
+        NUM2INT(height),
+        NUM2DBL(horizontal_position),
+        NUM2DBL(vertical_position),
+        StringValueCStr(string),
+        ws_chars,
+        ws_fg
+      );
+    }
+  } else {
+    result = lipgloss_place(
+      NUM2INT(width),
+      NUM2INT(height),
+      NUM2DBL(horizontal_position),
+      NUM2DBL(vertical_position),
+      StringValueCStr(string)
+    );
+  }
 
   VALUE rb_result = rb_utf8_str_new_cstr(result);
 
