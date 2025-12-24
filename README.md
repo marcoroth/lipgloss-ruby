@@ -416,6 +416,30 @@ puts tree.render
 | `Lipgloss.place_vertical(height, position, string)`       | Place vertically          |
 | `Lipgloss.has_dark_background?`                           | Check terminal background |
 
+### Color Blending
+
+| Method                                                         | Description                    |
+|----------------------------------------------------------------|--------------------------------|
+| `Lipgloss::ColorBlend.blend(c1, c2, t, mode:)`                 | Blend two colors (0.0-1.0)     |
+| `Lipgloss::ColorBlend.blends(c1, c2, steps, mode:)`            | Generate color gradient array  |
+| `Lipgloss::ColorBlend.grid(c1, c2, c3, c4, x, y, mode:)`       | Generate 2D color grid         |
+
+**Blend modes:** `:luv` (default, perceptually uniform), `:rgb`, `:hcl`
+
+#### Generate a 5-color gradient
+
+```ruby
+colors = Lipgloss::ColorBlend.blends("#FF0000", "#0000FF", 5)
+# => ["#ff0000", "#c1007f", "#7a00c1", "#0000ff", ...]
+```
+
+#### Blend two colors at 50%
+
+```ruby
+mid = Lipgloss::ColorBlend.blend("#FF0000", "#00FF00", 0.5)
+# => "#b5b500"
+```
+
 ## Development
 
 **Requirements:**
