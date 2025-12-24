@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Marco Roth"]
   spec.email = ["marco.roth@intergga.ch"]
 
-  spec.summary = "Ruby wrapper for Charm's lipgloss CSS-like terminal styling library."
-  spec.description = spec.summary
+  spec.summary = "Ruby wrapper for Charm's lipgloss. CSS-like terminal styling library."
+  spec.description = "Style Definitions for Nice Terminal Layouts. Built with TUIs in mind."
   spec.homepage = "https://github.com/marcoroth/lipgloss-ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"

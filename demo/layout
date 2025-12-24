@@ -1,0 +1,200 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# This example demonstrates various Lipgloss style and layout features.
+# Ported from the Go example at github.com/charmbracelet/lipgloss/examples/layout
+
+require_relative "../lib/lipgloss"
+require "io/console"
+
+WIDTH = 96
+COLUMN_WIDTH = 30
+
+NORMAL = "#EEEEEE"
+SUBTLE = Lipgloss::AdaptiveColor.new(light: "#D9DCCF", dark: "#383838")
+HIGHLIGHT = Lipgloss::AdaptiveColor.new(light: "#874BFD", dark: "#7D56F4")
+SPECIAL = Lipgloss::AdaptiveColor.new(light: "#43BF6D", dark: "#73F59F")
+
+BASE = Lipgloss::Style.new.foreground(NORMAL)
+DIVIDER = Lipgloss::Style.new.set_string("•").padding(0, 1).foreground(SUBTLE).to_s
+
+def url(text)
+  Lipgloss::Style.new.foreground(SPECIAL).render(text)
+end
+
+ACTIVE_TAB_BORDER = {
+  top: "─",
+  bottom: " ",
+  left: "│",
+  right: "│",
+  top_left: "╭",
+  top_right: "╮",
+  bottom_left: "┘",
+  bottom_right: "└"
+}.freeze
+
+TAB_BORDER = {
+  top: "─",
+  bottom: "─",
+  left: "│",
+  right: "│",
+  top_left: "╭",
+  top_right: "╮",
+  bottom_left: "┴",
+  bottom_right: "┴"
+}.freeze
+
+TAB = Lipgloss::Style.new.border_custom(**TAB_BORDER).border_foreground(HIGHLIGHT).padding(0, 1)
+ACTIVE_TAB = Lipgloss::Style.new.border_custom(**ACTIVE_TAB_BORDER).border_foreground(HIGHLIGHT).padding(0, 1)
+TAB_GAP = TAB.border_top(false).border_left(false).border_right(false)
+
+TITLE_STYLE = Lipgloss::Style.new.margin_left(1).margin_right(5).padding(0, 1).italic(true).foreground("#FFF7DB").set_string("Lip Gloss")
+DESC_STYLE = BASE.margin_top(1)
+INFO_STYLE = BASE.border(:normal, true, false, false, false).border_foreground(SUBTLE)
+
+DIALOG_BOX_STYLE = Lipgloss::Style.new.border(:rounded).border_foreground("#874BFD").padding(1, 0)
+BUTTON_STYLE = Lipgloss::Style.new.foreground("#FFF7DB").background("#888B7E").padding(0, 3).margin_top(1)
+ACTIVE_BUTTON_STYLE = Lipgloss::Style.new.foreground("#FFF7DB").background("#F25D94").padding(0, 3).margin_top(1).margin_right(2).underline(true)
+
+LIST = Lipgloss::Style.new.border(:normal, false, true, false, false).border_foreground(SUBTLE).margin_right(2).height(8).width(COLUMN_WIDTH + 1)
+CHECK_MARK = Lipgloss::Style.new.set_string("✓").foreground(SPECIAL).padding_right(1).to_s
+
+def list_header(text)
+  BASE.border(:normal, false, false, true, false).border_foreground(SUBTLE).margin_right(2).render(text)
+end
+
+def list_item(text)
+  BASE.padding_left(2).render(text)
+end
+
+def list_done(text)
+  CHECK_MARK + Lipgloss::Style.new.strikethrough(true).foreground(Lipgloss::AdaptiveColor.new(light: "#969B86", dark: "#696969")).render(text)
+end
+
+HISTORY_STYLE = Lipgloss::Style.new.align_horizontal(:left).foreground("#FAFAFA").background(HIGHLIGHT).margin(1, 3, 0, 0).padding(1, 2).height(19).width(COLUMN_WIDTH)
+STATUS_NUGGET = Lipgloss::Style.new.foreground("#FFFDF5").padding(0, 1)
+STATUS_BAR_STYLE = Lipgloss::Style.new.foreground(Lipgloss::AdaptiveColor.new(light: "#343433", dark: "#C1C6B2")).background(Lipgloss::AdaptiveColor.new(light: "#D9DCCF", dark: "#353533"))
+STATUS_STYLE = Lipgloss::Style.new.inherit(STATUS_BAR_STYLE).foreground("#FFFDF5").background("#FF5F87").padding(0, 1).margin_right(1)
+ENCODING_STYLE = Lipgloss::Style.new.foreground("#FFFDF5").background("#A550DF").padding(0, 1).align_horizontal(:right)
+STATUS_TEXT = Lipgloss::Style.new.inherit(STATUS_BAR_STYLE)
+FISH_CAKE_STYLE = Lipgloss::Style.new.foreground("#FFFDF5").background("#6124DF").padding(0, 1)
+
+DOC_STYLE = Lipgloss::Style.new.padding(1, 2, 1, 2)
+
+def color_grid(x_steps, y_steps)
+  Lipgloss::ColorBlend.grid("#F25D94", "#EDFF82", "#643AFF", "#14F9D5", x_steps, y_steps)
+end
+
+RAINBOW_COLORS = Lipgloss::ColorBlend.blends("#F25D94", "#EDFF82", 50)
+
+def rainbow(text)
+  text.each_char.with_index.map do |char, i|
+    Lipgloss::Style.new.foreground(RAINBOW_COLORS[i % RAINBOW_COLORS.length]).render(char)
+  end.join
+end
+
+physical_width = IO.console&.winsize&.[](1) || 0
+
+doc = String.new
+
+row = Lipgloss.join_horizontal(
+  :top,
+  ACTIVE_TAB.render("Lip Gloss"),
+  TAB.render("Blush"),
+  TAB.render("Eye Shadow"),
+  TAB.render("Mascara"),
+  TAB.render("Foundation")
+)
+gap = TAB_GAP.render(" " * [0, WIDTH - Lipgloss.width(row) - 2].max)
+row = Lipgloss.join_horizontal(:bottom, row, gap)
+doc << row << "\n\n"
+
+colors = color_grid(1, 5)
+title_parts = colors.map.with_index do |color_row, i|
+  offset = 2
+  TITLE_STYLE.margin_left(i * offset).background(color_row[0]).to_s
+end
+
+title = title_parts.join("\n")
+
+desc = Lipgloss.join_vertical(
+  :left,
+  DESC_STYLE.render("Style Definitions for Nice Terminal Layouts"),
+  INFO_STYLE.render("From marcoroth#{DIVIDER}#{url("https://github.com/marcoroth/lipgloss-ruby")}")
+)
+
+row = Lipgloss.join_horizontal(:top, title, desc)
+doc << row << "\n\n"
+
+ok_button = ACTIVE_BUTTON_STYLE.render("Yes")
+cancel_button = BUTTON_STYLE.render("Maybe")
+question = Lipgloss::Style.new.width(50).align_horizontal(:center).render(rainbow("Are you sure you want to eat marmalade?"))
+
+buttons = Lipgloss.join_horizontal(:top, ok_button, cancel_button)
+ui = Lipgloss.join_vertical(:center, question, buttons)
+
+dialog = Lipgloss.place(WIDTH, 9, :center, :center, DIALOG_BOX_STYLE.render(ui), whitespace_chars: "猫咪", whitespace_foreground: SUBTLE)
+
+doc << dialog << "\n\n"
+
+color_display = color_grid(14, 8).map do |row|
+  row.map { |color| Lipgloss::Style.new.set_string("  ").background(color).to_s }.join
+end.join("\n")
+
+list1 = Lipgloss.join_vertical(
+  :left,
+  list_header("Citrus Fruits to Try"),
+  list_done("Grapefruit"),
+  list_done("Yuzu"),
+  list_item("Citron"),
+  list_item("Kumquat"),
+  list_item("Pomelo")
+)
+
+list2 = Lipgloss.join_vertical(
+  :left,
+  list_header("Actual Lip Gloss Vendors"),
+  list_item("Glossier"),
+  list_item("Claire's Boutique"),
+  list_done("Nyx"),
+  list_item("Mac"),
+  list_done("Milk")
+)
+
+lists = Lipgloss.join_horizontal(
+  :top,
+  LIST.render(list1),
+  LIST.width(COLUMN_WIDTH).render(list2)
+)
+
+doc << Lipgloss.join_horizontal(:top, lists, color_display)
+doc << "\n"
+
+history_a = "The Romans learned from the Greeks that quinces slowly cooked with honey would \"set\" when cool. The Apicius gives a recipe for preserving whole quinces, stems and leaves attached, in a bath of honey diluted with defrutum: Roman marmalade. Preserves of quince and lemon appear (along with rose, apple, plum and pear) in the Book of ceremonies of the Byzantine Emperor Constantine VII Porphyrogennetos."
+history_b = "Medieval quince preserves, which went by the French name cotignac, produced in a clear version and a fruit pulp version, began to lose their medieval seasoning of spices in the 16th century. In the 17th century, La Varenne provided recipes for both thick and clear cotignac."
+history_c = "In 1524, Henry VIII, King of England, received a \"box of marmalade\" from Mr. Hull of Exeter. This was probably marmelada, a solid quince paste from Portugal, still made and sold in southern Europe today. It became a favourite treat of Anne Boleyn and her ladies in waiting."
+
+doc << Lipgloss.join_horizontal(
+  :top,
+  HISTORY_STYLE.align_horizontal(:right).render(history_a),
+  HISTORY_STYLE.align_horizontal(:center).render(history_b),
+  HISTORY_STYLE.margin_right(0).render(history_c)
+)
+doc << "\n\n"
+
+status_key = STATUS_STYLE.render("STATUS")
+encoding = ENCODING_STYLE.render("UTF-8")
+fish_cake = FISH_CAKE_STYLE.render("🍥 Fish Cake")
+status_val = STATUS_TEXT.width(WIDTH - Lipgloss.width(status_key) - Lipgloss.width(encoding) - Lipgloss.width(fish_cake)).render("Ravishing")
+
+bar = Lipgloss.join_horizontal(:top, status_key, status_val, encoding, fish_cake)
+
+doc << STATUS_BAR_STYLE.width(WIDTH).render(bar)
+
+final_style = if physical_width.positive?
+                DOC_STYLE.max_width(physical_width)
+              else
+                DOC_STYLE
+              end
+
+puts final_style.render(doc)

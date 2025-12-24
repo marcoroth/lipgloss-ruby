@@ -39,13 +39,7 @@ puts
 puts "Nested List:"
 fruits = Lipgloss::List.new("Apple", "Banana", "Orange").enumerator(:bullet)
 vegetables = Lipgloss::List.new("Carrot", "Broccoli", "Spinach").enumerator(:bullet)
-
-groceries = Lipgloss::List.new
-                          .item("Fruits")
-                          .item(fruits)
-                          .item("Vegetables")
-                          .item(vegetables)
-                          .enumerator(:arabic)
+groceries = Lipgloss::List.new.item("Fruits").item(fruits).item("Vegetables").item(vegetables).enumerator(:arabic)
 
 puts groceries.render
 puts
@@ -53,22 +47,13 @@ puts
 puts "Styled List:"
 enum_style = Lipgloss::Style.new.foreground("#FF6B6B").bold(true)
 item_style = Lipgloss::Style.new.foreground("#4ECDC4")
-
-styled_list = Lipgloss::List.new("Ruby", "Python", "JavaScript", "Go")
-                            .enumerator(:arabic)
-                            .enumerator_style(enum_style)
-                            .item_style(item_style)
+styled_list = Lipgloss::List.new("Ruby", "Python", "JavaScript", "Go").enumerator(:arabic).enumerator_style(enum_style).item_style(item_style)
 
 puts styled_list.render
 puts
 
 puts "Building List Incrementally:"
-todo = Lipgloss::List.new
-                     .item("Write code")
-                     .item("Test code")
-                     .item("Deploy code")
-                     .item("Monitor")
-                     .enumerator(:bullet)
-
+todo = Lipgloss::List.new.item("Write code").item("Test code").item("Deploy code").item("Monitor").enumerator(:bullet)
 puts todo.render
+
 puts

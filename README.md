@@ -1,13 +1,13 @@
 <div align="center">
   <h1>Lipgloss for Ruby</h1>
-  <h4>CSS-like Terminal Styling for Ruby CLI Apps</h4>
+  <h4>Style Definitions for Nice Terminal Layouts</h4>
 
   <p>
     <a href="https://rubygems.org/gems/lipgloss"><img alt="Gem Version" src="https://img.shields.io/gem/v/lipgloss"></a>
     <a href="https://github.com/marcoroth/lipgloss-ruby/blob/main/LICENSE.txt"><img alt="License" src="https://img.shields.io/github/license/marcoroth/lipgloss-ruby"></a>
   </p>
 
-  <p>Ruby bindings for <a href="https://github.com/charmbracelet/lipgloss">charmbracelet/lipgloss</a>.<br/>Style definitions for nice terminal layouts with a fluent, CSS-like API.</p>
+  <p>Ruby bindings for <a href="https://github.com/charmbracelet/lipgloss">charmbracelet/lipgloss</a>.<br/>Style definitions for nice terminal layouts. Built with TUIs in mind.</p>
 </div>
 
 ## Installation
@@ -471,6 +471,7 @@ bundle exec rake test
 ```bash
 ./demo/basic
 ./demo/colors
+./demo/layout
 ./demo/table
 ./demo/list
 ./demo/tree

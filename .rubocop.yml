@@ -34,9 +34,7 @@ Metrics/ParameterLists:
   Max: 10
 
 Layout/LineLength:
-  Exclude:
-    - Rakefile
-    - test/**
+  Enabled: false
 
 Security/Eval:
   Exclude:

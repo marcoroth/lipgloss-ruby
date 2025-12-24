@@ -133,14 +133,14 @@ module Lipgloss
       it "generates color array with blends" do
         colors = ColorBlend.blends("#FF0000", "#0000FF", 5)
         assert_equal 5, colors.length
-        assert colors.all? { |c| c.match?(/^#[0-9a-f]{6}$/) }
+        assert(colors.all? { |c| c.match?(/^#[0-9a-f]{6}$/) })
       end
 
       it "generates 2D color grid" do
         grid = ColorBlend.grid("#FF0000", "#00FF00", "#0000FF", "#FFFF00", 3, 2)
         assert_equal 2, grid.length
         assert_equal 3, grid[0].length
-        assert grid.flatten.all? { |c| c.match?(/^#[0-9a-f]{6}$/) }
+        assert(grid.flatten.all? { |c| c.match?(/^#[0-9a-f]{6}$/) })
       end
     end
   end

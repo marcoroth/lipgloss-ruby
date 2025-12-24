@@ -279,3 +279,110 @@ func lipgloss_style_string(id C.ulonglong) *C.char {
 	style := getStyle(uint64(id))
 	return C.CString(style.String())
 }
+
+// Getter methods
+
+//export lipgloss_style_get_bold
+func lipgloss_style_get_bold(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetBold() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_italic
+func lipgloss_style_get_italic(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetItalic() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_underline
+func lipgloss_style_get_underline(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetUnderline() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_strikethrough
+func lipgloss_style_get_strikethrough(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetStrikethrough() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_reverse
+func lipgloss_style_get_reverse(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetReverse() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_blink
+func lipgloss_style_get_blink(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetBlink() {
+		return 1
+	}
+	return 0
+}
+
+//export lipgloss_style_get_faint
+func lipgloss_style_get_faint(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	if style.GetFaint() {
+		return 1
+	}
+	return 0
+}
+
+// terminalColorToString converts a TerminalColor to its string representation
+func terminalColorToString(tc lipgloss.TerminalColor) string {
+	if tc == nil {
+		return ""
+	}
+	switch c := tc.(type) {
+	case lipgloss.Color:
+		return string(c)
+	case lipgloss.NoColor:
+		return ""
+	default:
+		// For adaptive/complete colors, we can't easily extract a single value
+		return ""
+	}
+}
+
+//export lipgloss_style_get_foreground
+func lipgloss_style_get_foreground(id C.ulonglong) *C.char {
+	style := getStyle(uint64(id))
+	color := terminalColorToString(style.GetForeground())
+	return C.CString(color)
+}
+
+//export lipgloss_style_get_background
+func lipgloss_style_get_background(id C.ulonglong) *C.char {
+	style := getStyle(uint64(id))
+	color := terminalColorToString(style.GetBackground())
+	return C.CString(color)
+}
+
+//export lipgloss_style_get_width
+func lipgloss_style_get_width(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	return C.int(style.GetWidth())
+}
+
+//export lipgloss_style_get_height
+func lipgloss_style_get_height(id C.ulonglong) C.int {
+	style := getStyle(uint64(id))
+	return C.int(style.GetHeight())
+}

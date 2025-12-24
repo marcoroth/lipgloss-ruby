@@ -15,11 +15,7 @@ data = [
   ["Spanish", "Buenos días", "Hola"]
 ]
 
-table = Lipgloss::Table.new
-                       .headers(["Language", "Formal", "Informal"])
-                       .rows(data)
-                       .border(:rounded)
-
+table = Lipgloss::Table.new.headers(["Language", "Formal", "Informal"]).rows(data).border(:rounded)
 puts table.render
 puts
 
@@ -32,12 +28,7 @@ data = [
   ["Charlie", "35", "Chicago"]
 ]
 
-styled_table = Lipgloss::Table.new
-                              .headers(["Name", "Age", "City"])
-                              .rows(data)
-                              .border(:rounded)
-                              .border_style(border_style)
-
+styled_table = Lipgloss::Table.new.headers(["Name", "Age", "City"]).rows(data).border(:rounded).border_style(border_style)
 puts styled_table.render
 puts
 
@@ -48,38 +39,26 @@ data = [
   ["Gizmo", "A useful tool"]
 ]
 
-wide_table = Lipgloss::Table.new
-                            .headers(["Item", "Description"])
-                            .rows(data)
-                            .border(:normal)
-                            .width(50)
-
+wide_table = Lipgloss::Table.new.headers(["Item", "Description"]).rows(data).border(:normal).width(50)
 puts wide_table.render
 puts
 
 puts "Border Style Comparison:"
 [:normal, :rounded, :thick, :double, :ascii].each do |style|
-  t = Lipgloss::Table.new
-                     .headers([style.to_s])
-                     .rows([["content"]])
-                     .border(style)
+  t = Lipgloss::Table.new.headers([style.to_s]).rows([["content"]]).border(style)
   puts t.render
   puts
 end
 
-# Markdown table
 puts "Markdown Table (for documentation):"
-md_table = Lipgloss::Table.new
-                          .headers(["Feature", "Status"])
-                          .rows([
-                                  ["Tables", "Done"],
-                                  ["Lists", "Done"],
-                                  ["Trees", "Done"]
-                                ])
-                          .border(:markdown)
-                          .border_top(false)
-                          .border_bottom(false)
 
+data = [
+  ["Tables", "Done"],
+  ["Lists", "Done"],
+  ["Trees", "Done"]
+]
+
+md_table = Lipgloss::Table.new.headers(["Feature", "Status"]).rows(data).border(:markdown).border_top(false).border_bottom(false)
 puts md_table.render
 puts
 
@@ -95,11 +74,7 @@ data = [
   ["Diana", "Engineer", "Frontend"]
 ]
 
-styled_table = Lipgloss::Table.new
-                              .headers(["Name", "Role", "Department"])
-                              .rows(data)
-                              .border(:rounded)
-                              .style_func(rows: 4, columns: 3) do |row, _col|
+styled_table = Lipgloss::Table.new.headers(["Name", "Role", "Department"]).rows(data).border(:rounded).style_func(rows: 4, columns: 3) do |row, _col|
   if row == Lipgloss::Table::HEADER_ROW
     header_style
   elsif row.even?
@@ -122,11 +97,7 @@ data = [
   ["Max Connections", "100"]
 ]
 
-config_table = Lipgloss::Table.new
-                              .headers(["Setting", "Value"])
-                              .rows(data)
-                              .border(:rounded)
-                              .style_func(rows: 3, columns: 2) do |row, col|
+config_table = Lipgloss::Table.new.headers(["Setting", "Value"]).rows(data).border(:rounded).style_func(rows: 3, columns: 2) do |row, col|
   if row == Lipgloss::Table::HEADER_ROW
     Lipgloss::Style.new.bold(true)
   elsif col.zero?

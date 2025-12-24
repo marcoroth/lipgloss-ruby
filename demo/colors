@@ -28,16 +28,16 @@ puts
 puts "Complete Colors (fallbacks for different terminal capabilities):"
 complete = Lipgloss::CompleteColor.new(
   true_color: "#FF6B6B",
-  ansi256: "196",
-  ansi: "9"
+  ansi256: 196,
+  ansi: :bright_red
 )
 complete_style = Lipgloss::Style.new.foreground(complete)
 puts complete_style.render("Coral red with fallbacks")
 
 complete_blue = Lipgloss::CompleteColor.new(
   true_color: "#4ECDC4",
-  ansi256: "80",
-  ansi: "6"
+  ansi256: 80,
+  ansi: :cyan
 )
 blue_style = Lipgloss::Style.new.foreground(complete_blue)
 puts blue_style.render("Teal with fallbacks")
@@ -48,13 +48,13 @@ puts "Complete Adaptive Colors (best of both worlds):"
 complete_adaptive = Lipgloss::CompleteAdaptiveColor.new(
   light: Lipgloss::CompleteColor.new(
     true_color: "#1A1A2E",
-    ansi256: "234",
-    ansi: "0"
+    ansi256: 234,
+    ansi: :black
   ),
   dark: Lipgloss::CompleteColor.new(
     true_color: "#EAEAEA",
-    ansi256: "255",
-    ansi: "15"
+    ansi256: 255,
+    ansi: :bright_white
   )
 )
 
@@ -63,10 +63,7 @@ puts complete_adaptive_style.render("Adapts + has fallbacks for all terminal typ
 puts
 
 puts "Background Colors:"
-bg_style = Lipgloss::Style.new
-                          .foreground("#FFFFFF")
-                          .background("#7D56F4")
-                          .padding(0, 1)
+bg_style = Lipgloss::Style.new.foreground("#FFFFFF").background("#7D56F4").padding(0, 1)
 
 puts bg_style.render("Purple background")
 puts
@@ -75,22 +72,17 @@ puts "Combined Styling:"
 
 foreground_color = Lipgloss::CompleteColor.new(
   true_color: "#FFD700",
-  ansi256: "220",
-  ansi: "11"
+  ansi256: 220,
+  ansi: :bright_yellow
 )
 
 background_color = Lipgloss::CompleteColor.new(
   true_color: "#2D2D2D",
-  ansi256: "236",
-  ansi: "0"
+  ansi256: 236,
+  ansi: :black
 )
 
-fancy = Lipgloss::Style.new
-                       .bold(true)
-                       .foreground(foreground_color)
-                       .background(background_color)
-                       .padding(0, 2)
-
+fancy = Lipgloss::Style.new.bold(true).foreground(foreground_color).background(background_color).padding(0, 2)
 puts fancy.render("Gold on Dark Gray")
 puts
 

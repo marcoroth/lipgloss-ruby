@@ -6,47 +6,30 @@ require_relative "../lib/lipgloss"
 puts "=== Lipgloss Ruby Demo ==="
 puts
 
-style = Lipgloss::Style.new
-                       .bold(true)
-                       .foreground("#FAFAFA")
-                       .background("#7D56F4")
-                       .padding(1, 2)
-
+style = Lipgloss::Style.new.bold(true).foreground("#FAFAFA").background("#7D56F4").padding(1, 2)
 puts style.render("Hello, Lipgloss!")
 puts
 
-box = Lipgloss::Style.new
-                     .border(:rounded)
-                     .border_foreground("#874BFD")
-                     .padding(0, 1)
-
+box = Lipgloss::Style.new.border(:rounded).border_foreground("#874BFD").padding(0, 1)
 puts box.render("Rounded border")
 puts
 
 [:normal, :thick, :double, :ascii].each do |border_type|
-  bordered = Lipgloss::Style.new
-                            .border(border_type)
-                            .padding(0, 1)
+  bordered = Lipgloss::Style.new.border(border_type).padding(0, 1)
+
   puts bordered.render("#{border_type} border")
 end
 puts
 
-left = Lipgloss::Style.new
-                      .border(:rounded)
-                      .padding(0, 2)
-                      .render("Left")
-
-right = Lipgloss::Style.new
-                       .border(:rounded)
-                       .padding(0, 2)
-                       .render("Right")
+left = Lipgloss::Style.new.border(:rounded).padding(0, 2).render("Left")
+right = Lipgloss::Style.new.border(:rounded).padding(0, 2).render("Right")
 
 puts "Horizontal join:"
-puts Lipgloss.join_horizontal(Lipgloss::TOP, [left, right])
+puts Lipgloss.join_horizontal(:top, left, right)
 puts
 
 puts "Vertical join:"
-puts Lipgloss.join_vertical(Lipgloss::CENTER, [left, right])
+puts Lipgloss.join_vertical(:left, left, right)
 puts
 
 text = "Hello\nWorld"

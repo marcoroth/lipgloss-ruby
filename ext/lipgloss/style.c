@@ -344,6 +344,80 @@ static VALUE style_to_s(VALUE self) {
   return rb_result;
 }
 
+// Getter methods
+
+static VALUE style_get_bold(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_bold(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_italic(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_italic(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_underline(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_underline(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_strikethrough(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_strikethrough(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_reverse(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_reverse(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_blink(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_blink(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_faint(VALUE self) {
+  GET_STYLE(self, style);
+  return lipgloss_style_get_faint(style->handle) ? Qtrue : Qfalse;
+}
+
+static VALUE style_get_foreground(VALUE self) {
+  GET_STYLE(self, style);
+  char *result = lipgloss_style_get_foreground(style->handle);
+  if (result == NULL || result[0] == '\0') {
+    if (result) lipgloss_free(result);
+    return Qnil;
+  }
+  VALUE rb_result = rb_utf8_str_new_cstr(result);
+  lipgloss_free(result);
+  return rb_result;
+}
+
+static VALUE style_get_background(VALUE self) {
+  GET_STYLE(self, style);
+  char *result = lipgloss_style_get_background(style->handle);
+
+  if (result == NULL || result[0] == '\0') {
+    if (result) lipgloss_free(result);
+    return Qnil;
+  }
+
+  VALUE rb_result = rb_utf8_str_new_cstr(result);
+  lipgloss_free(result);
+
+  return rb_result;
+}
+
+static VALUE style_get_width(VALUE self) {
+  GET_STYLE(self, style);
+  return INT2NUM(lipgloss_style_get_width(style->handle));
+}
+
+static VALUE style_get_height(VALUE self) {
+  GET_STYLE(self, style);
+  return INT2NUM(lipgloss_style_get_height(style->handle));
+}
+
 void Init_lipgloss_style(void) {
   cStyle = rb_define_class_under(mLipgloss, "Style", rb_cObject);
 
@@ -352,7 +426,6 @@ void Init_lipgloss_style(void) {
   rb_define_method(cStyle, "initialize", style_initialize, 0);
   rb_define_method(cStyle, "render", style_render, 1);
 
-  // Formatting
   rb_define_method(cStyle, "bold", style_bold, 1);
   rb_define_method(cStyle, "italic", style_italic, 1);
   rb_define_method(cStyle, "underline", style_underline, 1);
@@ -361,23 +434,19 @@ void Init_lipgloss_style(void) {
   rb_define_method(cStyle, "blink", style_blink, 1);
   rb_define_method(cStyle, "faint", style_faint, 1);
 
-  // Colors
   rb_define_method(cStyle, "foreground", style_foreground, 1);
   rb_define_method(cStyle, "background", style_background, 1);
   rb_define_method(cStyle, "margin_background", style_margin_background, 1);
 
-  // Size
   rb_define_method(cStyle, "width", style_width, 1);
   rb_define_method(cStyle, "height", style_height, 1);
   rb_define_method(cStyle, "max_width", style_max_width, 1);
   rb_define_method(cStyle, "max_height", style_max_height, 1);
 
-  // Alignment
   rb_define_method(cStyle, "_align", style_align, -1);
   rb_define_method(cStyle, "_align_horizontal", style_align_horizontal, 1);
   rb_define_method(cStyle, "_align_vertical", style_align_vertical, 1);
 
-  // Other
   rb_define_method(cStyle, "inline", style_inline, 1);
   rb_define_method(cStyle, "tab_width", style_tab_width, 1);
   rb_define_method(cStyle, "underline_spaces", style_underline_spaces, 1);
@@ -387,7 +456,18 @@ void Init_lipgloss_style(void) {
   rb_define_method(cStyle, "inherit", style_inherit, 1);
   rb_define_method(cStyle, "to_s", style_to_s, 0);
 
-  // Register methods from sub-files
+  rb_define_method(cStyle, "bold?", style_get_bold, 0);
+  rb_define_method(cStyle, "italic?", style_get_italic, 0);
+  rb_define_method(cStyle, "underline?", style_get_underline, 0);
+  rb_define_method(cStyle, "strikethrough?", style_get_strikethrough, 0);
+  rb_define_method(cStyle, "reverse?", style_get_reverse, 0);
+  rb_define_method(cStyle, "blink?", style_get_blink, 0);
+  rb_define_method(cStyle, "faint?", style_get_faint, 0);
+  rb_define_method(cStyle, "get_foreground", style_get_foreground, 0);
+  rb_define_method(cStyle, "get_background", style_get_background, 0);
+  rb_define_method(cStyle, "get_width", style_get_width, 0);
+  rb_define_method(cStyle, "get_height", style_get_height, 0);
+
   register_style_spacing_methods();
   register_style_border_methods();
   register_style_unset_methods();

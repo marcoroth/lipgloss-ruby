@@ -13,8 +13,8 @@ int is_adaptive_color(VALUE object) {
 static VALUE lipgloss_join_horizontal_rb(VALUE self, VALUE position, VALUE strings) {
   Check_Type(strings, T_ARRAY);
 
-  VALUE json_str = rb_funcall(strings, rb_intern("to_json"), 0);
-  char *result = lipgloss_join_horizontal(NUM2DBL(position), StringValueCStr(json_str));
+  VALUE json_string = rb_funcall(strings, rb_intern("to_json"), 0);
+  char *result = lipgloss_join_horizontal(NUM2DBL(position), StringValueCStr(json_string));
   VALUE rb_result = rb_utf8_str_new_cstr(result);
 
   lipgloss_free(result);
@@ -25,8 +25,8 @@ static VALUE lipgloss_join_horizontal_rb(VALUE self, VALUE position, VALUE strin
 static VALUE lipgloss_join_vertical_rb(VALUE self, VALUE position, VALUE strings) {
   Check_Type(strings, T_ARRAY);
 
-  VALUE json_str = rb_funcall(strings, rb_intern("to_json"), 0);
-  char *result = lipgloss_join_vertical(NUM2DBL(position), StringValueCStr(json_str));
+  VALUE json_string = rb_funcall(strings, rb_intern("to_json"), 0);
+  char *result = lipgloss_join_vertical(NUM2DBL(position), StringValueCStr(json_string));
   VALUE rb_result = rb_utf8_str_new_cstr(result);
 
   lipgloss_free(result);
@@ -162,7 +162,7 @@ static VALUE lipgloss_upstream_version_rb(VALUE self) {
 static VALUE lipgloss_version_rb(VALUE self) {
   VALUE gem_version = rb_const_get(self, rb_intern("VERSION"));
   VALUE upstream_version = lipgloss_upstream_version_rb(self);
-  VALUE format_string = rb_utf8_str_new_cstr("lipgloss v%s (upstream v%s) [Go native extension]");
+  VALUE format_string = rb_utf8_str_new_cstr("lipgloss v%s (upstream %s) [Go native extension]");
 
   return rb_funcall(rb_mKernel, rb_intern("sprintf"), 3, format_string, gem_version, upstream_version);
 }

@@ -54,8 +54,8 @@ module Lipgloss
     # @rbs vertical: Position::position_value
     # @rbs string: String
     # @rbs return: String
-    def place(width, height, horizontal, vertical, string, **opts)
-      _place(width, height, Position.resolve(horizontal), Position.resolve(vertical), string, **opts)
+    def place(width, height, horizontal, vertical, string, **)
+      _place(width, height, Position.resolve(horizontal), Position.resolve(vertical), string, **)
     end
 
     # @rbs width: Integer

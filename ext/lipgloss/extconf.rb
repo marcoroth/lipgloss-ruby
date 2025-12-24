@@ -56,6 +56,16 @@ when /linux/
   $LDFLAGS << " -lresolv" if find_library("resolv", "res_query")
 end
 
-$srcs = ["extension.c", "style.c", "style_spacing.c", "style_border.c", "style_unset.c", "table.c", "list.c", "tree.c", "color.c"]
+$srcs = [
+  "color.c",
+  "extension.c",
+  "list.c",
+  "style_border.c",
+  "style_spacing.c",
+  "style_unset.c",
+  "style.c",
+  "table.c",
+  "tree.c"
+]
 
 create_makefile("#{extension_name}/#{extension_name}")
