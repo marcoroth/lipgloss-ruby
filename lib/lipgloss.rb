@@ -2,7 +2,14 @@
 # rbs_inline: enabled
 
 require_relative "lipgloss/version"
-require_relative "lipgloss/lipgloss"
+
+begin
+  major, minor, _patch = RUBY_VERSION.split(".") #: [String, String, String]
+  require_relative "lipgloss/#{major}.#{minor}/lipgloss"
+rescue LoadError
+  require_relative "lipgloss/lipgloss"
+end
+
 require_relative "lipgloss/position"
 require_relative "lipgloss/border"
 require_relative "lipgloss/color"
