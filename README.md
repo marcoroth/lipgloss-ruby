@@ -52,7 +52,7 @@ heading = Lipgloss::Style.new
 
 body = Lipgloss::Style.new
   .width(40)
-  .align(Lipgloss::CENTER)
+  .align(:center)
 
 puts heading.render("Welcome")
 puts body.render("Styled terminal output")
@@ -118,20 +118,22 @@ puts style.render("Rainbow border!")
 left = box.render("Left")
 right = box.render("Right")
 
-puts Lipgloss.join_horizontal(Lipgloss::TOP, [left, right])
+puts Lipgloss.join_horizontal(:top, left, right)
 ```
 
 **Join content vertically:**
 
 ```ruby
-puts Lipgloss.join_vertical(Lipgloss::CENTER, [left, right])
+puts Lipgloss.join_vertical(:center, left, right)
 ```
 
 **Place content in whitespace:**
 
 ```ruby
-puts Lipgloss.place(40, 10, Lipgloss::CENTER, Lipgloss::CENTER, "Centered")
+puts Lipgloss.place(40, 10, :center, :center, "Centered")
 ```
+
+**Position symbols:** `:top`, `:bottom`, `:left`, `:right`, `:center` (or numeric 0.0-1.0)
 
 ### Colors
 
@@ -376,7 +378,7 @@ puts tree.render
 | `align_horizontal(position)`  | Horizontal alignment |
 | `align_vertical(position)`    | Vertical alignment   |
 
-**Position constants:** `Lipgloss::TOP`, `Lipgloss::BOTTOM`, `Lipgloss::LEFT`, `Lipgloss::RIGHT`, `Lipgloss::CENTER`
+**Position symbols:** `:top`, `:bottom`, `:left`, `:right`, `:center` (or numeric 0.0-1.0)
 
 ### Other
 
@@ -402,17 +404,17 @@ puts tree.render
 
 ## Module Methods
 
-| Method                                                                          | Description              |
-|---------------------------------------------------------------------------------|--------------------------|
-| `Lipgloss.join_horizontal(position, strings)`                                   | Join strings horizontally |
-| `Lipgloss.join_vertical(position, strings)`                                     | Join strings vertically  |
-| `Lipgloss.width(string)`                                                        | Get rendered width       |
-| `Lipgloss.height(string)`                                                       | Get rendered height      |
-| `Lipgloss.size(string)`                                                         | Get `[width, height]`    |
-| `Lipgloss.place(width, height, horizontal_position, vertical_position, string)` | Place in whitespace      |
-| `Lipgloss.place_horizontal(width, position, string)`                            | Place horizontally       |
-| `Lipgloss.place_vertical(height, position, string)`                             | Place vertically         |
-| `Lipgloss.has_dark_background?`                                                 | Check terminal background |
+| Method                                                    | Description               |
+|-----------------------------------------------------------|---------------------------|
+| `Lipgloss.join_horizontal(position, *strings)`            | Join strings horizontally |
+| `Lipgloss.join_vertical(position, *strings)`              | Join strings vertically   |
+| `Lipgloss.width(string)`                                  | Get rendered width        |
+| `Lipgloss.height(string)`                                 | Get rendered height       |
+| `Lipgloss.size(string)`                                   | Get `[width, height]`     |
+| `Lipgloss.place(width, height, h_pos, v_pos, string)`     | Place in whitespace       |
+| `Lipgloss.place_horizontal(width, position, string)`      | Place horizontally        |
+| `Lipgloss.place_vertical(height, position, string)`       | Place vertically          |
+| `Lipgloss.has_dark_background?`                           | Check terminal background |
 
 ## Development
 

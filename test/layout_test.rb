@@ -5,17 +5,24 @@ require_relative "test_helper"
 module Lipgloss
   class LayoutTest < Minitest::Spec
     it "joins strings horizontally" do
-      left = "Left"
-      right = "Right"
-      result = Lipgloss.join_horizontal(Lipgloss::TOP, [left, right])
+      result = Lipgloss.join_horizontal(:top, "Left", "Right")
       assert_equal "LeftRight", result
     end
 
     it "joins strings vertically" do
-      top = "Top"
-      bottom = "Bottom"
-      result = Lipgloss.join_vertical(Lipgloss::LEFT, [top, bottom])
+      result = Lipgloss.join_vertical(:left, "Top", "Bottom")
       assert_equal "Top   \nBottom", result
+    end
+
+    it "joins multiple strings with varargs" do
+      result = Lipgloss.join_horizontal(:top, "A", "B", "C", "D")
+      assert_equal "ABCD", result
+    end
+
+    it "joins splatted array" do
+      items = ["X", "Y", "Z"]
+      result = Lipgloss.join_horizontal(:top, *items)
+      assert_equal "XYZ", result
     end
 
     it "calculates width" do
@@ -36,20 +43,17 @@ module Lipgloss
     end
 
     it "places text at position" do
-      text = "X"
-      result = Lipgloss.place(5, 3, Lipgloss::CENTER, Lipgloss::CENTER, text)
+      result = Lipgloss.place(5, 3, :center, :center, "X")
       assert_equal "     \n  X  \n     ", result
     end
 
     it "places text horizontally" do
-      text = "X"
-      result = Lipgloss.place_horizontal(10, Lipgloss::CENTER, text)
+      result = Lipgloss.place_horizontal(10, :center, "X")
       assert_equal "    X     ", result
     end
 
     it "places text vertically" do
-      text = "X"
-      result = Lipgloss.place_vertical(5, Lipgloss::CENTER, text)
+      result = Lipgloss.place_vertical(5, :center, "X")
       assert_equal " \n \nX\n \n ", result
     end
 

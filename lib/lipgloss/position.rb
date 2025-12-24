@@ -23,5 +23,22 @@ module Lipgloss
 
     # Center alignment (0.5)
     CENTER = 0.5
+
+    SYMBOLS = {
+      top: TOP,
+      bottom: BOTTOM,
+      left: LEFT,
+      right: RIGHT,
+      center: CENTER
+    }.freeze
+
+    def self.resolve(value)
+      case value
+      when Symbol then SYMBOLS.fetch(value) { raise ArgumentError, "Unknown position: #{value.inspect}" }
+      when String then SYMBOLS.fetch(value.to_sym) { raise ArgumentError, "Unknown position: #{value.inspect}" }
+      when Numeric then value.to_f
+      else raise ArgumentError, "Position must be a Symbol or Numeric, got #{value.class}"
+      end
+    end
   end
 end

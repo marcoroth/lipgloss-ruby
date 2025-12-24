@@ -13,6 +13,7 @@ end
 require_relative "lipgloss/position"
 require_relative "lipgloss/border"
 require_relative "lipgloss/color"
+require_relative "lipgloss/style"
 require_relative "lipgloss/table"
 
 module Lipgloss
@@ -31,4 +32,26 @@ module Lipgloss
   ASCII_BORDER = Border::ASCII #: Symbol
 
   NO_TAB_CONVERSION = -1 #: Integer
+
+  class << self
+    def join_horizontal(position, *strings)
+      _join_horizontal(Position.resolve(position), strings)
+    end
+
+    def join_vertical(position, *strings)
+      _join_vertical(Position.resolve(position), strings)
+    end
+
+    def place(width, height, horizontal, vertical, string, **opts)
+      _place(width, height, Position.resolve(horizontal), Position.resolve(vertical), string, **opts)
+    end
+
+    def place_horizontal(width, position, string)
+      _place_horizontal(width, Position.resolve(position), string)
+    end
+
+    def place_vertical(height, position, string)
+      _place_vertical(height, Position.resolve(position), string)
+    end
+  end
 end

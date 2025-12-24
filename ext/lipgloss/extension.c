@@ -178,14 +178,14 @@ __attribute__((__visibility__("default"))) void Init_lipgloss(void) {
   Init_lipgloss_tree();
   Init_lipgloss_color();
 
-  rb_define_singleton_method(mLipgloss, "join_horizontal", lipgloss_join_horizontal_rb, 2);
-  rb_define_singleton_method(mLipgloss, "join_vertical", lipgloss_join_vertical_rb, 2);
+  rb_define_singleton_method(mLipgloss, "_join_horizontal", lipgloss_join_horizontal_rb, 2);
+  rb_define_singleton_method(mLipgloss, "_join_vertical", lipgloss_join_vertical_rb, 2);
   rb_define_singleton_method(mLipgloss, "width", lipgloss_width_rb, 1);
   rb_define_singleton_method(mLipgloss, "height", lipgloss_height_rb, 1);
   rb_define_singleton_method(mLipgloss, "size", lipgloss_size_rb, 1);
-  rb_define_singleton_method(mLipgloss, "place", lipgloss_place_rb, -1);
-  rb_define_singleton_method(mLipgloss, "place_horizontal", lipgloss_place_horizontal_rb, 3);
-  rb_define_singleton_method(mLipgloss, "place_vertical", lipgloss_place_vertical_rb, 3);
+  rb_define_singleton_method(mLipgloss, "_place", lipgloss_place_rb, -1);
+  rb_define_singleton_method(mLipgloss, "_place_horizontal", lipgloss_place_horizontal_rb, 3);
+  rb_define_singleton_method(mLipgloss, "_place_vertical", lipgloss_place_vertical_rb, 3);
   rb_define_singleton_method(mLipgloss, "has_dark_background?", lipgloss_has_dark_background_rb, 0);
   rb_define_singleton_method(mLipgloss, "upstream_version", lipgloss_upstream_version_rb, 0);
   rb_define_singleton_method(mLipgloss, "version", lipgloss_version_rb, 0);

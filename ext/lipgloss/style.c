@@ -373,9 +373,9 @@ void Init_lipgloss_style(void) {
   rb_define_method(cStyle, "max_height", style_max_height, 1);
 
   // Alignment
-  rb_define_method(cStyle, "align", style_align, -1);
-  rb_define_method(cStyle, "align_horizontal", style_align_horizontal, 1);
-  rb_define_method(cStyle, "align_vertical", style_align_vertical, 1);
+  rb_define_method(cStyle, "_align", style_align, -1);
+  rb_define_method(cStyle, "_align_horizontal", style_align_horizontal, 1);
+  rb_define_method(cStyle, "_align_vertical", style_align_vertical, 1);
 
   // Other
   rb_define_method(cStyle, "inline", style_inline, 1);
