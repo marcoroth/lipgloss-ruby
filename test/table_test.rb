@@ -167,11 +167,11 @@ module Lipgloss
                              .headers(["A", "B"])
                              .rows([["1", "2"], ["3", "4"]])
                              .style_func(rows: 2, columns: 2) do |row, _col|
-        if row == Lipgloss::Table::HEADER_ROW
-          header_style
-        else
-          row_style
-        end
+                               if row == Lipgloss::Table::HEADER_ROW
+                                 header_style
+                               else
+                                 row_style
+                               end
       end
 
       result = strip_ansi(table.render)
@@ -188,7 +188,7 @@ module Lipgloss
                              .headers(["X"])
                              .rows([["A"], ["B"], ["C"]])
                              .style_func(rows: 3, columns: 1) do |row, _col|
-        row.even? ? even_style : odd_style
+                               row.even? ? even_style : odd_style
       end
 
       result = strip_ansi(table.render)
