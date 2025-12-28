@@ -3,7 +3,7 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 
 require "lipgloss"
-require "minitest/autorun"
+require "maxitest/autorun"
 
 def strip_ansi(string)
   string.gsub(/\e\[[0-9;]*[A-Za-z]/, "")
