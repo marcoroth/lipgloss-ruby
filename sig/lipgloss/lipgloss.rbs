@@ -165,4 +165,17 @@ module Lipgloss
     def render: () -> String
     def to_s: () -> String
   end
+
+  module ColorBlend
+    LUV: Symbol
+    RGB: Symbol
+    HCL: Symbol
+
+    def self.blend: (String c1, String c2, Float t, ?mode: Symbol) -> String
+    def self.blend_luv: (String c1, String c2, Float t) -> String
+    def self.blend_rgb: (String c1, String c2, Float t) -> String
+    def self.blend_hcl: (String c1, String c2, Float t) -> String
+    def self.blends: (String c1, String c2, Integer steps, ?mode: Symbol) -> Array[String]
+    def self.grid: (String c1, String c2, String c3, String c4, Integer x, Integer y, ?mode: Symbol) -> Array[Array[String]]
+  end
 end
