@@ -296,8 +296,7 @@ puts list.render
 **Create tree structures:**
 
 ```ruby
-tree = Lipgloss::Tree.new
-  .root("Project")
+tree = Lipgloss::Tree.root("Project")
   .child("src")
   .child("lib")
   .child("test")
@@ -308,11 +307,10 @@ puts tree.render
 **Nested trees:**
 
 ```ruby
-src = Lipgloss::Tree.new.root("src").child("main.rb").child("helper.rb")
-test = Lipgloss::Tree.new.root("test").child("test_main.rb")
+src = Lipgloss::Tree.root("src").child("main.rb").child("helper.rb")
+test = Lipgloss::Tree.root("test").child("test_main.rb")
 
-tree = Lipgloss::Tree.new
-  .root("Project")
+tree = Lipgloss::Tree.root("Project")
   .child(src)
   .child(test)
 
