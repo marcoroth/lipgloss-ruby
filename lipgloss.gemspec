@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
     "lipgloss.gemspec",
     "LICENSE.txt",
     "README.md",
+    "sig/**/*.rbs",
     "lib/**/*.rb",
     "ext/**/*.{c,h,rb}",
     "go/**/*.{go,mod,sum}",
