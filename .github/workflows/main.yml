@@ -18,6 +18,7 @@ jobs:
           - '3.3'
           - '3.4'
           - '4.0'
+          - 'jruby-10.0'
 
     steps:
       - name: Checkout
@@ -35,17 +36,25 @@ jobs:
           go-version-file: go/go.mod
           cache-dependency-path: go/go.sum
 
-      - name: Build Go Library
+      - name: Build Go Library (C archive)
+        if: ${{ !startsWith(matrix.ruby, 'jruby') }}
         run: bundle exec rake go:build
 
+      - name: Build Go Library (shared)
+        if: ${{ startsWith(matrix.ruby, 'jruby') }}
+        run: bundle exec rake go:build_shared
+
       - name: Compile Native Extension
+        if: ${{ !startsWith(matrix.ruby, 'jruby') }}
         run: bundle exec rake compile
 
       - name: Run tests
         run: bundle exec rake test
 
       - name: Run steep check
+        if: ${{ !startsWith(matrix.ruby, 'jruby') }}
         run: bundle exec steep check
 
       - name: Run rubocop
+        if: ${{ !startsWith(matrix.ruby, 'jruby') }}
         run: bundle exec rubocop

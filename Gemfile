@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "ffi", platform: :jruby
 gem "irb"
 gem "maxitest", "~> 7.0"
 gem "rake", "~> 13.0"

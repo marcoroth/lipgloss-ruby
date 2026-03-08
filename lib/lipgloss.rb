@@ -3,11 +3,15 @@
 
 require_relative "lipgloss/version"
 
-begin
-  major, minor, _patch = RUBY_VERSION.split(".") #: [String, String, String]
-  require_relative "lipgloss/#{major}.#{minor}/lipgloss"
-rescue LoadError
-  require_relative "lipgloss/lipgloss"
+if RUBY_ENGINE == "jruby"
+  require_relative "lipgloss/ffi_bindings"
+else
+  begin
+    major, minor, _patch = RUBY_VERSION.split(".") #: [String, String, String]
+    require_relative "lipgloss/#{major}.#{minor}/lipgloss"
+  rescue LoadError
+    require_relative "lipgloss/lipgloss"
+  end
 end
 
 require_relative "lipgloss/position"

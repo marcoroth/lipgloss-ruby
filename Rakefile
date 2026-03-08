@@ -82,6 +82,16 @@ begin
       end
     end
 
+    desc "Build Go shared library for current platform"
+    task :build_shared do
+      platform = detect_go_platform
+      output_dir = "go/build/#{platform}"
+      FileUtils.mkdir_p(output_dir)
+
+      ext = RbConfig::CONFIG["host_os"] =~ /darwin/ ? "dylib" : "so"
+      sh "cd go && CGO_ENABLED=1 go build -buildmode=c-shared -o build/#{platform}/liblipgloss.#{ext} ."
+    end
+
     desc "Clean Go build artifacts"
     task :clean do
       FileUtils.rm_rf("go/build")

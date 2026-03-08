@@ -31,5 +31,9 @@ Gem::Specification.new do |spec|
   ]
 
   spec.require_paths = ["lib"]
-  spec.extensions = ["ext/lipgloss/extconf.rb"]
+  spec.extensions = ["ext/lipgloss/extconf.rb"] unless RUBY_ENGINE == "jruby"
+
+  if RUBY_ENGINE == "jruby"
+    spec.add_dependency "ffi"
+  end
 end

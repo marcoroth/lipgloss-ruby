@@ -132,6 +132,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  ffi
   irb
   lipgloss!
   maxitest (~> 7.0)
