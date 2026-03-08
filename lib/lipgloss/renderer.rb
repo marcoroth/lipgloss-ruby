@@ -44,7 +44,7 @@ module Lipgloss
           gap = max_width - line_width
           left = (gap * position).floor
           right = gap - left
-          " " * left + line + " " * right
+          (" " * left) + line + (" " * right)
         else
           line
         end
@@ -78,16 +78,14 @@ module Lipgloss
           gap = width - line_width
           left = (gap * position).floor
           right = gap - left
-          " " * left + line + " " * right
+          (" " * left) + line + (" " * right)
         end
       end.join("\n")
     end
 
     def _place_vertical(height, position, string)
       lines = string.split("\n", -1)
-      if lines.length >= height
-        return lines.join("\n")
-      end
+      return lines.join("\n") if lines.length >= height
 
       content_width = lines.map { |l| Ansi.width(l) }.max || 0
       gap = height - lines.length

@@ -138,12 +138,10 @@ module Lipgloss
     end
 
     def self.detect_profile
-      if ENV["COLORTERM"] == "truecolor" || ENV["COLORTERM"] == "24bit"
-        :true_color
-      elsif ENV["TERM"]&.include?("256color")
+      if ENV["TERM"]&.include?("256color")
         :ansi256
       else
-        :true_color  # default to true_color for modern terminals
+        :true_color
       end
     end
 
@@ -164,8 +162,6 @@ module Lipgloss
       code ? "\e[#{code}m" : ""
     end
 
-    private
-
     def self.resolve_color_code(color_value, type)
       case color_value
       when CompleteAdaptiveColor
@@ -178,8 +174,6 @@ module Lipgloss
         resolve_complete_color(color_value, type)
       when String
         resolve_string_color(color_value, type)
-      else
-        nil
       end
     end
 
@@ -197,6 +191,7 @@ module Lipgloss
 
     def self.resolve_string_color(str, type)
       return nil if str.nil? || str.empty?
+
       if str.start_with?("#")
         resolve_hex_color(str, type)
       else
@@ -208,9 +203,7 @@ module Lipgloss
     def self.resolve_hex_color(hex, type)
       hex = hex.delete_prefix("#")
       # Expand #RGB to #RRGGBB
-      if hex.length == 3
-        hex = hex.chars.map { |c| c * 2 }.join
-      end
+      hex = hex.chars.map { |c| c * 2 }.join if hex.length == 3
       r = hex[0..1].to_i(16)
       g = hex[2..3].to_i(16)
       b = hex[4..5].to_i(16)
@@ -238,10 +231,12 @@ module Lipgloss
     end
 
     def self.has_dark_background?
-      bg = ENV["COLORFGBG"]
+      bg = ENV.fetch("COLORFGBG", nil)
       return true if bg.nil?
+
       parts = bg.split(";")
       return true if parts.length < 2
+
       parts.last.to_i < 8
     end
   end
@@ -297,17 +292,17 @@ module Lipgloss
       end
 
       def to_hex(r, g, b)
-        r = [[r, 0.0].max, 1.0].min
-        g = [[g, 0.0].max, 1.0].min
-        b = [[b, 0.0].max, 1.0].min
-        "#%02x%02x%02x" % [(r * 255).round, (g * 255).round, (b * 255).round]
+        r = r.clamp(0.0, 1.0)
+        g = g.clamp(0.0, 1.0)
+        b = b.clamp(0.0, 1.0)
+        format("#%<r>02x%<g>02x%<b>02x", r: (r * 255).round, g: (g * 255).round, b: (b * 255).round)
       end
 
       def blend_rgb_values(r1, g1, b1, r2, g2, b2, t)
         to_hex(
-          r1 + (r2 - r1) * t,
-          g1 + (g2 - g1) * t,
-          b1 + (b2 - b1) * t
+          r1 + ((r2 - r1) * t),
+          g1 + ((g2 - g1) * t),
+          b1 + ((b2 - b1) * t)
         )
       end
 
@@ -316,9 +311,9 @@ module Lipgloss
         # Convert to linear RGB, then XYZ, then L*uv, blend, convert back
         l1, u1, v1 = rgb_to_luv(r1, g1, b1)
         l2, u2, v2 = rgb_to_luv(r2, g2, b2)
-        l = l1 + (l2 - l1) * t
-        u = u1 + (u2 - u1) * t
-        v = v1 + (v2 - v1) * t
+        l = l1 + ((l2 - l1) * t)
+        u = u1 + ((u2 - u1) * t)
+        v = v1 + ((v2 - v1) * t)
         r, g, b = luv_to_rgb(l, u, v)
         to_hex(r, g, b)
       end
@@ -335,9 +330,9 @@ module Lipgloss
           dh += 2 * Math::PI
         end
 
-        h = h1 + dh * t
-        c = c1_val + (c2_val - c1_val) * t
-        l = l1 + (l2 - l1) * t
+        h = h1 + (dh * t)
+        c = c1_val + ((c2_val - c1_val) * t)
+        l = l1 + ((l2 - l1) * t)
         r, g, b = hcl_to_rgb(h, c, l)
         to_hex(r, g, b)
       end
@@ -348,23 +343,23 @@ module Lipgloss
       end
 
       def delinearize(v)
-        v <= 0.0031308 ? v * 12.92 : 1.055 * (v**(1.0 / 2.4)) - 0.055
+        v <= 0.0031308 ? v * 12.92 : (1.055 * (v**(1.0 / 2.4))) - 0.055
       end
 
       def rgb_to_xyz(r, g, b)
         rl = linearize(r)
         gl = linearize(g)
         bl = linearize(b)
-        x = 0.4124564 * rl + 0.3575761 * gl + 0.1804375 * bl
-        y = 0.2126729 * rl + 0.7151522 * gl + 0.0721750 * bl
-        z = 0.0193339 * rl + 0.1191920 * gl + 0.9503041 * bl
+        x = (0.4124564 * rl) + (0.3575761 * gl) + (0.1804375 * bl)
+        y = (0.2126729 * rl) + (0.7151522 * gl) + (0.0721750 * bl)
+        z = (0.0193339 * rl) + (0.1191920 * gl) + (0.9503041 * bl)
         [x, y, z]
       end
 
       def xyz_to_rgb(x, y, z)
-        r = delinearize( 3.2404542 * x - 1.5371385 * y - 0.4985314 * z)
-        g = delinearize(-0.9692660 * x + 1.8760108 * y + 0.0415560 * z)
-        b = delinearize( 0.0556434 * x - 0.2040259 * y + 1.0572252 * z)
+        r = delinearize((3.2404542 * x) - (1.5371385 * y) - (0.4985314 * z))
+        g = delinearize((-0.9692660 * x) + (1.8760108 * y) + (0.0415560 * z))
+        b = delinearize((0.0556434 * x) - (0.2040259 * y) + (1.0572252 * z))
         [r, g, b]
       end
 
@@ -375,13 +370,14 @@ module Lipgloss
       def rgb_to_luv(r, g, b)
         x, y, z = rgb_to_xyz(r, g, b)
         l = if y / D65_Y <= (6.0 / 29.0)**3
-              (29.0 / 3.0)**3 * y / D65_Y
+              ((29.0 / 3.0)**3) * y / D65_Y
             else
-              116.0 * (y / D65_Y)**(1.0 / 3.0) - 16.0
+              (116.0 * ((y / D65_Y)**(1.0 / 3.0))) - 16.0
             end
-        denom = x + 15.0 * y + 3.0 * z
-        denom_ref = D65_X + 15.0 * D65_Y + 3.0 * D65_Z
+        denom = x + (15.0 * y) + (3.0 * z)
+        denom_ref = D65_X + (15.0 * D65_Y) + (3.0 * D65_Z)
         return [0.0, 0.0, 0.0] if denom < 1e-10
+
         u_prime = 4.0 * x / denom
         v_prime = 9.0 * y / denom
         u_prime_ref = 4.0 * D65_X / denom_ref
@@ -393,25 +389,27 @@ module Lipgloss
 
       def luv_to_rgb(l, u, v)
         return [0.0, 0.0, 0.0] if l <= 1e-10
-        denom_ref = D65_X + 15.0 * D65_Y + 3.0 * D65_Z
+
+        denom_ref = D65_X + (15.0 * D65_Y) + (3.0 * D65_Z)
         u_prime_ref = 4.0 * D65_X / denom_ref
         v_prime_ref = 9.0 * D65_Y / denom_ref
-        u_prime = u / (13.0 * l) + u_prime_ref
-        v_prime = v / (13.0 * l) + v_prime_ref
+        u_prime = (u / (13.0 * l)) + u_prime_ref
+        v_prime = (v / (13.0 * l)) + v_prime_ref
         y = if l <= 8.0
-              D65_Y * l * (3.0 / 29.0)**3
+              D65_Y * l * ((3.0 / 29.0)**3)
             else
-              D65_Y * ((l + 16.0) / 116.0)**3
+              D65_Y * (((l + 16.0) / 116.0)**3)
             end
         return [0.0, 0.0, 0.0] if v_prime.abs < 1e-10
+
         x = y * 9.0 * u_prime / (4.0 * v_prime)
-        z = y * (12.0 - 3.0 * u_prime - 20.0 * v_prime) / (4.0 * v_prime)
+        z = y * (12.0 - (3.0 * u_prime) - (20.0 * v_prime)) / (4.0 * v_prime)
         xyz_to_rgb(x, y, z)
       end
 
       def rgb_to_hcl(r, g, b)
         l, u, v = rgb_to_luv(r, g, b)
-        c = Math.sqrt(u * u + v * v)
+        c = Math.sqrt((u * u) + (v * v))
         h = Math.atan2(v, u)
         [h, c, l]
       end

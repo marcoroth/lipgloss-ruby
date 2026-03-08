@@ -35,15 +35,14 @@ module Lipgloss
       str = (text || @props[:string_value] || "").to_s
 
       str = convert_tabs(str)
-      str = apply_max_width(str) if @set[:max_width] && @props[:max_width] > 0
+      str = apply_max_width(str) if @set[:max_width] && @props[:max_width].positive?
       str = apply_width_and_alignment(str)
       str = apply_height_and_valign(str)
       str = apply_padding(str)
       str = apply_border(str)
       str = apply_margins(str)
       str = apply_inline(str) if @props[:inline]
-      str = apply_ansi_styles(str)
-      str
+      apply_ansi_styles(str)
     end
 
     def to_s
@@ -52,7 +51,7 @@ module Lipgloss
 
     # ---- Text formatting setters ----
 
-    %i[bold italic underline strikethrough reverse blink faint].each do |prop|
+    [:bold, :italic, :underline, :strikethrough, :reverse, :blink, :faint].each do |prop|
       define_method(prop) do |value|
         with(prop, value)
       end
@@ -76,12 +75,20 @@ module Lipgloss
 
     def get_foreground
       c = @props[:foreground]
-      c.is_a?(String) ? (c.empty? ? nil : c) : (c ? c.to_s : nil)
+      if c.is_a?(String)
+        c.empty? ? nil : c
+      else
+        c&.to_s
+      end
     end
 
     def get_background
       c = @props[:background]
-      c.is_a?(String) ? (c.empty? ? nil : c) : (c ? c.to_s : nil)
+      if c.is_a?(String)
+        c.empty? ? nil : c
+      else
+        c&.to_s
+      end
     end
 
     # ---- Size setters ----
@@ -114,12 +121,8 @@ module Lipgloss
 
     def align(*positions)
       result = self
-      if positions.length >= 1
-        result = result._align_horizontal(Lipgloss::Position.resolve(positions[0]))
-      end
-      if positions.length >= 2
-        result = result._align_vertical(Lipgloss::Position.resolve(positions[1]))
-      end
+      result = result._align_horizontal(Lipgloss::Position.resolve(positions[0])) if positions.length >= 1
+      result = result._align_vertical(Lipgloss::Position.resolve(positions[1])) if positions.length >= 2
       result
     end
 
@@ -151,7 +154,7 @@ module Lipgloss
       end
     end
 
-    %i[padding_top padding_right padding_bottom padding_left].each do |prop|
+    [:padding_top, :padding_right, :padding_bottom, :padding_left].each do |prop|
       define_method(prop) do |value|
         with(prop, value)
       end
@@ -167,7 +170,7 @@ module Lipgloss
       end
     end
 
-    %i[margin_top margin_right margin_bottom margin_left].each do |prop|
+    [:margin_top, :margin_right, :margin_bottom, :margin_left].each do |prop|
       define_method(prop) do |value|
         with(prop, value)
       end
@@ -184,7 +187,7 @@ module Lipgloss
           s.set_prop(:border_bottom, true)
           s.set_prop(:border_left, true)
         else
-          s.set_prop(:border_top, sides[0] || false) if sides.length > 0
+          s.set_prop(:border_top, sides[0] || false) if sides.length.positive?
           s.set_prop(:border_right, sides[1] || false) if sides.length > 1
           s.set_prop(:border_bottom, sides[2] || false) if sides.length > 2
           s.set_prop(:border_left, sides[3] || false) if sides.length > 3
@@ -226,14 +229,14 @@ module Lipgloss
 
       if needs_side_space
         custom = custom.dup
-        custom[:left] = " " if !has_left
-        custom[:right] = " " if !has_right
+        custom[:left] = " " unless has_left
+        custom[:right] = " " unless has_right
         # Also set corner chars to space when sides use space
-        if !has_left
+        unless has_left
           custom[:top_left] = " " if custom[:top_left].empty?
           custom[:bottom_left] = " " if custom[:bottom_left].empty?
         end
-        if !has_right
+        unless has_right
           custom[:top_right] = " " if custom[:top_right].empty?
           custom[:bottom_right] = " " if custom[:bottom_right].empty?
         end
@@ -248,7 +251,7 @@ module Lipgloss
       end
     end
 
-    %i[border_top border_right border_bottom border_left].each do |prop|
+    [:border_top, :border_right, :border_bottom, :border_left].each do |prop|
       define_method(prop) do |value|
         with(prop, value)
       end
@@ -272,14 +275,14 @@ module Lipgloss
       end
     end
 
-    %i[border_top_foreground border_right_foreground border_bottom_foreground border_left_foreground].each do |method|
+    [:border_top_foreground, :border_right_foreground, :border_bottom_foreground, :border_left_foreground].each do |method|
       prop = method.to_s.sub("foreground", "fg").to_sym
       define_method(method) do |color|
         with(prop, color)
       end
     end
 
-    %i[border_top_background border_right_background border_bottom_background border_left_background].each do |method|
+    [:border_top_background, :border_right_background, :border_bottom_background, :border_left_background].each do |method|
       prop = method.to_s.sub("background", "bg").to_sym
       define_method(method) do |color|
         with(prop, color)
@@ -305,20 +308,14 @@ module Lipgloss
     def inherit(other)
       dup_with do |s|
         other.instance_variable_get(:@set).each_key do |key|
-          unless s.instance_variable_get(:@set).key?(key)
-            s.set_prop(key, other.instance_variable_get(:@props)[key])
-          end
+          s.set_prop(key, other.instance_variable_get(:@props)[key]) unless s.instance_variable_get(:@set).key?(key)
         end
       end
     end
 
     # ---- Unset ----
 
-    %i[bold italic underline strikethrough reverse blink faint
-       foreground background width height
-       padding_top padding_right padding_bottom padding_left
-       margin_top margin_right margin_bottom margin_left
-       border_style inline].each do |prop|
+    [:bold, :italic, :underline, :strikethrough, :reverse, :blink, :faint, :foreground, :background, :width, :height, :padding_top, :padding_right, :padding_bottom, :padding_left, :margin_top, :margin_right, :margin_bottom, :margin_left, :border_style, :inline].each do |prop|
       actual_prop = prop == :border_style ? :border_type : prop
       define_method(:"unset_#{prop}") do
         dup_with do |s|
@@ -360,8 +357,9 @@ module Lipgloss
 
     def convert_tabs(str)
       tw = @props[:tab_width]
-      return str if tw < 0
-      return str.gsub("\t", "") if tw == 0
+      return str if tw.negative?
+      return str.gsub("\t", "") if tw.zero?
+
       str.gsub("\t", " " * tw)
     end
 
@@ -393,11 +391,11 @@ module Lipgloss
         if current_width + word_width <= max_w
           current_line += word
           current_width += word_width
-        elsif current_width == 0
+        elsif current_width.zero?
           # Single word longer than max_width, force break character by character
           word.each_char do |ch|
             ch_width = visible_width(ch)
-            if current_width + ch_width > max_w && current_width > 0
+            if current_width + ch_width > max_w && current_width.positive?
               result << current_line
               current_line = ch
               current_width = ch_width
@@ -454,7 +452,7 @@ module Lipgloss
       gap = target_width - line_width
       left = (gap * align).floor
       right = gap - left
-      " " * left + line + " " * right
+      (" " * left) + line + (" " * right)
     end
 
     def apply_padding(str)
@@ -463,12 +461,12 @@ module Lipgloss
       pb = @props[:padding_bottom]
       pl = @props[:padding_left]
 
-      return str if pt == 0 && pr == 0 && pb == 0 && pl == 0
+      return str if pt.zero? && pr.zero? && pb.zero? && pl.zero?
 
       lines = str.split("\n", -1)
 
       # Add left/right padding
-      if pl > 0 || pr > 0
+      if pl.positive? || pr.positive?
         lines = lines.map do |line|
           (" " * pl) + line + (" " * pr)
         end
@@ -478,15 +476,15 @@ module Lipgloss
       content_width = lines.map { |l| visible_width(l) }.max || 0
 
       # Add top padding
-      if pt > 0
+      if pt.positive?
         blank = " " * content_width
         lines = Array.new(pt, blank) + lines
       end
 
       # Add bottom padding
-      if pb > 0
+      if pb.positive?
         blank = " " * content_width
-        lines = lines + Array.new(pb, blank)
+        lines += Array.new(pb, blank)
       end
 
       lines.join("\n")
@@ -523,7 +521,7 @@ module Lipgloss
       # Content lines with side borders
       lines.each do |line|
         line_width = visible_width(line)
-        padded_line = line + " " * (content_width - line_width)
+        padded_line = line + (" " * (content_width - line_width))
         bordered = ""
         bordered += colorize_border_char(chars[:left], :left) if has_left
         bordered += padded_line
@@ -569,28 +567,28 @@ module Lipgloss
       mb = @props[:margin_bottom]
       ml = @props[:margin_left]
 
-      return str if mt == 0 && mr == 0 && mb == 0 && ml == 0
+      return str if mt.zero? && mr.zero? && mb.zero? && ml.zero?
 
       lines = str.split("\n", -1)
 
       # Add left/right margins
-      if ml > 0 || mr > 0
+      if ml.positive? || mr.positive?
         lines = lines.map do |line|
-          " " * ml + line + " " * mr
+          (" " * ml) + line + (" " * mr)
         end
       end
 
       # Add top margins
       content_width = lines.map { |l| visible_width(l) }.max || 0
-      if mt > 0
+      if mt.positive?
         blank = " " * content_width
         lines = Array.new(mt, blank) + lines
       end
 
       # Add bottom margins
-      if mb > 0
+      if mb.positive?
         blank = " " * content_width
-        lines = lines + Array.new(mb, blank)
+        lines += Array.new(mb, blank)
       end
 
       lines.join("\n")

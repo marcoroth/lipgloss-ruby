@@ -72,41 +72,37 @@ module Lipgloss
 
           # First line of subtree (the root)
           sub_root = sub_lines[0]
-          if @enumerator_style
-            styled_prefix = @enumerator_style.render(prefix.rstrip)
-          else
-            styled_prefix = prefix
-          end
+          styled_prefix = if @enumerator_style
+                            @enumerator_style.render(prefix.rstrip)
+                          else
+                            prefix
+                          end
 
-          if @item_style
-            sub_root = @item_style.render(sub_root)
-          end
+          sub_root = @item_style.render(sub_root) if @item_style
 
-          lines << styled_prefix + sub_root
+          lines << (styled_prefix + sub_root)
 
           # Remaining lines (children of subtree)
           sub_lines[1..].each do |sub_line|
-            lines << continuation + sub_line
+            lines << (continuation + sub_line)
           end
         else
           item_text = child_item.to_s
-          if @item_style
-            item_text = @item_style.render(item_text)
-          end
+          item_text = @item_style.render(item_text) if @item_style
 
-          if @enumerator_style
-            styled_prefix = @enumerator_style.render(prefix.rstrip)
-          else
-            styled_prefix = prefix
-          end
+          styled_prefix = if @enumerator_style
+                            @enumerator_style.render(prefix.rstrip)
+                          else
+                            prefix
+                          end
 
-          lines << styled_prefix + item_text
+          lines << (styled_prefix + item_text)
         end
       end
 
       lines.join("\n")
     end
 
-    alias_method :to_s, :render
+    alias to_s render
   end
 end

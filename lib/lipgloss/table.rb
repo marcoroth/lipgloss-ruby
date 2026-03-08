@@ -49,13 +49,13 @@ module Lipgloss
       dup_with { |t| t.instance_variable_set(:@border_style_obj, style) }
     end
 
-    %i[border_top border_bottom border_left border_right border_header border_column border_row].each do |method|
+    [:border_top, :border_bottom, :border_left, :border_right, :border_header, :border_column, :border_row].each do |method|
       define_method(method) do |value|
         dup_with { |t| t.instance_variable_set(:"@#{method}", value) }
       end
     end
 
-    %i[width height].each do |method|
+    [:width, :height].each do |method|
       define_method(method) do |value|
         dup_with { |t| t.instance_variable_set(:"@#{method}", value) }
       end
@@ -113,7 +113,7 @@ module Lipgloss
 
     def render
       num_cols = [@headers.length, *@rows.map(&:length)].max || 0
-      return "" if num_cols == 0
+      return "" if num_cols.zero?
 
       chars = Border.chars_for(@border_type)
 
@@ -121,45 +121,33 @@ module Lipgloss
       col_widths = calculate_column_widths(num_cols)
 
       # Apply width constraint
-      if @width > 0
-        col_widths = distribute_width(col_widths, num_cols)
-      end
+      col_widths = distribute_width(col_widths, num_cols) if @width.positive?
 
       lines = []
 
       # Top border
-      if @border_top
-        lines << build_horizontal_border(col_widths, chars, :top)
-      end
+      lines << build_horizontal_border(col_widths, chars, :top) if @border_top
 
       # Header row
-      if @headers.any?
-        lines << build_data_row(@headers, col_widths, chars, HEADER_ROW)
-      end
+      lines << build_data_row(@headers, col_widths, chars, HEADER_ROW) if @headers.any?
 
       # Header separator
-      if @border_header && @headers.any?
-        lines << build_horizontal_border(col_widths, chars, :middle)
-      end
+      lines << build_horizontal_border(col_widths, chars, :middle) if @border_header && @headers.any?
 
       # Data rows
       @rows.each_with_index do |row_data, row_idx|
         # Row separator (between data rows)
-        if @border_row && row_idx > 0
-          lines << build_horizontal_border(col_widths, chars, :middle)
-        end
+        lines << build_horizontal_border(col_widths, chars, :middle) if @border_row && row_idx.positive?
         lines << build_data_row(row_data, col_widths, chars, row_idx)
       end
 
       # Bottom border
-      if @border_bottom
-        lines << build_horizontal_border(col_widths, chars, :bottom)
-      end
+      lines << build_horizontal_border(col_widths, chars, :bottom) if @border_bottom
 
       lines.join("\n")
     end
 
-    alias_method :to_s, :render
+    alias to_s render
 
     private
 
@@ -174,6 +162,7 @@ module Lipgloss
       @rows.each do |row_data|
         row_data.each_with_index do |cell, i|
           next if i >= num_cols
+
           w = Ansi.width(cell.to_s)
           widths[i] = w if w > widths[i]
         end
@@ -207,22 +196,20 @@ module Lipgloss
 
     def build_horizontal_border(col_widths, chars, position)
       corner_left, corner_right, horizontal, separator = case position
-        when :top
-          [chars[:top_left], chars[:top_right], chars[:top], chars[:middle_top]]
-        when :middle
-          [chars[:middle_left], chars[:middle_right], chars[:top], chars[:middle]]
-        when :bottom
-          [chars[:bottom_left], chars[:bottom_right], chars[:bottom], chars[:middle_bottom]]
-        end
+                                                         when :top
+                                                           [chars[:top_left], chars[:top_right], chars[:top], chars[:middle_top]]
+                                                         when :middle
+                                                           [chars[:middle_left], chars[:middle_right], chars[:top], chars[:middle]]
+                                                         when :bottom
+                                                           [chars[:bottom_left], chars[:bottom_right], chars[:bottom], chars[:middle_bottom]]
+                                                         end
 
       line = ""
       line += style_border_char(corner_left) if @border_left
 
       col_widths.each_with_index do |w, i|
         line += style_border_char(horizontal * w)
-        if i < col_widths.length - 1 && @border_column
-          line += style_border_char(separator)
-        end
+        line += style_border_char(separator) if i < col_widths.length - 1 && @border_column
       end
 
       line += style_border_char(corner_right) if @border_right
@@ -243,12 +230,10 @@ module Lipgloss
         end
 
         cell_width = Ansi.width(cell_text)
-        padded = cell_text + " " * [w - cell_width, 0].max
+        padded = cell_text + (" " * [w - cell_width, 0].max)
         line += padded
 
-        if i < col_widths.length - 1 && @border_column
-          line += style_border_char(chars[:left])
-        end
+        line += style_border_char(chars[:left]) if i < col_widths.length - 1 && @border_column
       end
 
       line += style_border_char(chars[:right]) if @border_right
@@ -257,6 +242,7 @@ module Lipgloss
 
     def style_border_char(char)
       return char unless @border_style_obj
+
       @border_style_obj.render(char)
     end
   end

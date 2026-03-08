@@ -42,6 +42,7 @@ module Lipgloss
     # codes is an array of ANSI escape strings like ["\e[1m", "\e[38;2;255;0;0m"]
     def self.apply(text, codes)
       return text if codes.empty? || text.empty?
+
       "#{codes.join}#{text}#{RESET}"
     end
 
@@ -49,6 +50,7 @@ module Lipgloss
     # This prevents style bleeding across newlines
     def self.apply_per_line(text, codes)
       return text if codes.empty?
+
       text.split("\n", -1).map { |line| line.empty? ? line : apply(line, codes) }.join("\n")
     end
   end

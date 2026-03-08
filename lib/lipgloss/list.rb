@@ -5,16 +5,16 @@ module Lipgloss
     include Immutable
 
     ENUMERATORS = {
-      bullet: ->(i, _total) { "\u2022 " },
+      bullet: ->(_i, _total) { "\u2022 " },
       arabic: ->(i, _total) { "#{i + 1}. " },
       alphabet: ->(i, _total) { "#{("A".ord + i).chr}. " },
-      roman: ->(i, total) {
+      roman: lambda { |i, total|
         numerals = (1..total).map { |n| List.to_roman(n) }
         max_width = numerals.map(&:length).max
         "#{numerals[i].rjust(max_width)}. "
       },
-      dash: ->(i, _total) { "- " },
-      asterisk: ->(i, _total) { "* " }
+      dash: ->(_i, _total) { "- " },
+      asterisk: ->(_i, _total) { "* " }
     }.freeze
 
     def initialize(*items)
@@ -55,16 +55,16 @@ module Lipgloss
         else
           prefix = ENUMERATORS[@enumerator_type].call(i, total)
 
-          if @enumerator_style
-            styled_prefix = @enumerator_style.render(prefix.rstrip)
-          else
-            styled_prefix = prefix
-          end
+          styled_prefix = if @enumerator_style
+                            @enumerator_style.render(prefix.rstrip)
+                          else
+                            prefix
+                          end
 
           item_text = cur_item.to_s
           item_text = @item_style.render(item_text) if @item_style
 
-          lines << ("#{" " * indent}#{styled_prefix}#{item_text}")
+          lines << "#{" " * indent}#{styled_prefix}#{item_text}"
         end
       end
 
@@ -77,7 +77,7 @@ module Lipgloss
 
     def self.to_roman(n)
       values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
-      symbols = %w[M CM D CD C XC L XL X IX V IV I]
+      symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
       result = +""
       values.each_with_index do |val, i|
         while n >= val
@@ -87,6 +87,5 @@ module Lipgloss
       end
       result
     end
-
   end
 end
