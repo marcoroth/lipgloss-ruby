@@ -1,4 +1,4 @@
-# Signatures for the C extension (ext/lipgloss/extension.c)
+# Signatures for pure Ruby implementation
 
 module Lipgloss
   def self._join_horizontal: (Float position, Array[String] strings) -> String
@@ -10,12 +10,45 @@ module Lipgloss
   def self._place_horizontal: (Integer width, Float position, String string) -> String
   def self._place_vertical: (Integer height, Float position, String string) -> String
   def self.has_dark_background?: () -> bool
-  def self.upstream_version: () -> String
-  def self.version: () -> String
+
+  module Immutable
+  end
+
+  module Ansi
+    ANSI_RE: Regexp
+    BOLD: String
+    FAINT: String
+    ITALIC: String
+    UNDERLINE: String
+    BLINK: String
+    REVERSE: String
+    STRIKETHROUGH: String
+
+    def self.strip: (String str) -> String
+    def self.width: (String str) -> Integer
+    def self.height: (String str) -> Integer
+    def self.size: (String str) -> [Integer, Integer]
+    def self.apply: (String str, Array[String] codes) -> String
+    def self.apply_per_line: (String str, Array[String] codes) -> String
+  end
+
+  module Color
+    def self.profile: () -> Symbol
+    def self.detect_profile: () -> Symbol
+    def self.reset_profile!: () -> void
+    def self.to_ansi_fg: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value) -> String
+    def self.to_ansi_bg: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value) -> String
+    def self.has_dark_background?: () -> bool
+  end
 
   class Style
+    include Immutable
+
+    DEFAULT_TAB_WIDTH: Integer
+    PROPERTIES: Hash[Symbol, untyped]
+
     def initialize: () -> void
-    def render: (String string) -> String
+    def render: (?String? text) -> String
     def to_s: () -> String
 
     def bold: (bool value) -> Style
@@ -26,14 +59,30 @@ module Lipgloss
     def blink: (bool value) -> Style
     def faint: (bool value) -> Style
 
+    def bold?: () -> bool
+    def italic?: () -> bool
+    def underline?: () -> bool
+    def strikethrough?: () -> bool
+    def reverse?: () -> bool
+    def blink?: () -> bool
+    def faint?: () -> bool
+
     def foreground: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color) -> Style
     def background: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color) -> Style
-    def margin_background: (String color) -> Style
+
+    def get_foreground: () -> String?
+    def get_background: () -> String?
 
     def width: (Integer width) -> Style
     def height: (Integer height) -> Style
     def max_width: (Integer width) -> Style
     def max_height: (Integer height) -> Style
+    def get_width: () -> Integer
+    def get_height: () -> Integer
+
+    def align: (*Position::position_value positions) -> Style
+    def align_horizontal: (Position::position_value position) -> Style
+    def align_vertical: (Position::position_value position) -> Style
 
     def padding: (*Integer values) -> Style
     def padding_top: (Integer value) -> Style
@@ -47,7 +96,7 @@ module Lipgloss
     def margin_bottom: (Integer value) -> Style
     def margin_left: (Integer value) -> Style
 
-    def border: (Symbol border_type, *bool sides) -> Style
+    def border: (Symbol | Hash[Symbol, String] border_type, *bool sides) -> Style
     def border_style: (Symbol border_type) -> Style
     def border_foreground: (String color) -> Style
     def border_background: (String color) -> Style
@@ -81,14 +130,8 @@ module Lipgloss
       ?middle_bottom: String
     ) -> Style
 
-    def _align: (*Float positions) -> Style
-    def _align_horizontal: (Float position) -> Style
-    def _align_vertical: (Float position) -> Style
-
     def inline: (bool value) -> Style
     def tab_width: (Integer width) -> Style
-    def underline_spaces: (bool value) -> Style
-    def strikethrough_spaces: (bool value) -> Style
 
     def set_string: (String string) -> Style
     def inherit: (Style other) -> Style
@@ -117,6 +160,10 @@ module Lipgloss
   end
 
   class Table
+    include Immutable
+
+    HEADER_ROW: Integer
+
     def initialize: () -> void
     def headers: (Array[String] headers) -> Table
     def row: (Array[String] row) -> Table
@@ -132,36 +179,42 @@ module Lipgloss
     def border_row: (bool value) -> Table
     def width: (Integer width) -> Table
     def height: (Integer height) -> Table
-    def offset: (Integer offset) -> Table
-    def wrap: (bool value) -> Table
     def clear_rows: () -> Table
+    def style_func: (rows: Integer, columns: Integer) { (Integer, Integer) -> Style? } -> Table
     def render: () -> String
     def to_s: () -> String
-    def _style_func_map: (Hash[String, Style] style_map) -> Table
   end
 
   class List
+    include Immutable
+
+    ENUMERATORS: Hash[Symbol, ^(Integer, Integer) -> String]
+
     def initialize: (*String items) -> void
     def item: (String | List item) -> List
     def items: (Array[String] items) -> List
     def enumerator: (Symbol enum_type) -> List
     def enumerator_style: (Style style) -> List
     def item_style: (Style style) -> List
-    def render: () -> String
+    def render: (?indent: Integer) -> String
     def to_s: () -> String
+    def self.to_roman: (Integer n) -> String
   end
 
   class Tree
-    def initialize: (?String root) -> void
+    include Immutable
+
+    ENUMERATOR_CHARS: Hash[Symbol, Hash[Symbol, String]]
+
+    def initialize: (?String? root) -> void
     def self.root: (String root) -> Tree
     def root=: (String root) -> Tree
     def child: (*(String | Tree) children) -> Tree
-    def children: (Array[String] children) -> Tree
+    def children: (Array[String | Tree] children) -> Tree
     def enumerator: (Symbol enum_type) -> Tree
     def enumerator_style: (Style style) -> Tree
     def item_style: (Style style) -> Tree
     def root_style: (Style style) -> Tree
-    def offset: (Integer start, Integer end) -> Tree
     def render: () -> String
     def to_s: () -> String
   end
@@ -171,11 +224,8 @@ module Lipgloss
     RGB: Symbol
     HCL: Symbol
 
-    def self.blend: (String c1, String c2, Float t, ?mode: Symbol) -> String
-    def self.blend_luv: (String c1, String c2, Float t) -> String
-    def self.blend_rgb: (String c1, String c2, Float t) -> String
-    def self.blend_hcl: (String c1, String c2, Float t) -> String
-    def self.blends: (String c1, String c2, Integer steps, ?mode: Symbol) -> Array[String]
-    def self.grid: (String c1, String c2, String c3, String c4, Integer x, Integer y, ?mode: Symbol) -> Array[Array[String]]
+    def self.blend: (String c1, String c2, Float t, ?mode: Symbol?) -> String
+    def self.blends: (String c1, String c2, Integer steps, ?mode: Symbol?) -> Array[String]
+    def self.grid: (String c1, String c2, String c3, String c4, Integer x, Integer y, ?mode: Symbol?) -> Array[Array[String]]
   end
 end

@@ -13,5 +13,8 @@ module Lipgloss
     # @rbs position: Position::position_value
     # @rbs return: Style
     def align_vertical: (Position::position_value position) -> Style
+
+    def _align_horizontal: (Float position) -> Style
+    def _align_vertical: (Float position) -> Style
   end
 end

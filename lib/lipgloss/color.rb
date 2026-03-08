@@ -130,4 +130,297 @@ module Lipgloss
       { light: @light.to_h, dark: @dark.to_h }
     end
   end
+
+  module Color
+    # Detect terminal color profile from environment (cached)
+    def self.profile
+      @profile ||= detect_profile
+    end
+
+    def self.detect_profile
+      if ENV["COLORTERM"] == "truecolor" || ENV["COLORTERM"] == "24bit"
+        :true_color
+      elsif ENV["TERM"]&.include?("256color")
+        :ansi256
+      else
+        :true_color  # default to true_color for modern terminals
+      end
+    end
+
+    def self.reset_profile!
+      @profile = nil
+    end
+
+    # Convert a color value to foreground ANSI escape code
+    # Accepts: hex string (#RGB or #RRGGBB), ANSI number string, AdaptiveColor, CompleteColor, CompleteAdaptiveColor
+    def self.to_ansi_fg(color_value)
+      code = resolve_color_code(color_value, :fg)
+      code ? "\e[#{code}m" : ""
+    end
+
+    # Convert a color value to background ANSI escape code
+    def self.to_ansi_bg(color_value)
+      code = resolve_color_code(color_value, :bg)
+      code ? "\e[#{code}m" : ""
+    end
+
+    private
+
+    def self.resolve_color_code(color_value, type)
+      case color_value
+      when CompleteAdaptiveColor
+        cc = has_dark_background? ? color_value.dark : color_value.light
+        resolve_complete_color(cc, type)
+      when AdaptiveColor
+        chosen = has_dark_background? ? color_value.dark : color_value.light
+        resolve_string_color(chosen, type)
+      when CompleteColor
+        resolve_complete_color(color_value, type)
+      when String
+        resolve_string_color(color_value, type)
+      else
+        nil
+      end
+    end
+
+    def self.resolve_complete_color(cc, type)
+      p = profile
+      case p
+      when :true_color
+        resolve_string_color(cc.true_color, type)
+      when :ansi256
+        resolve_ansi256(cc.ansi256.to_i, type)
+      else
+        resolve_ansi_basic(cc.ansi.to_i, type)
+      end
+    end
+
+    def self.resolve_string_color(str, type)
+      return nil if str.nil? || str.empty?
+      if str.start_with?("#")
+        resolve_hex_color(str, type)
+      else
+        # Treat as ANSI 256 number
+        resolve_ansi256(str.to_i, type)
+      end
+    end
+
+    def self.resolve_hex_color(hex, type)
+      hex = hex.delete_prefix("#")
+      # Expand #RGB to #RRGGBB
+      if hex.length == 3
+        hex = hex.chars.map { |c| c * 2 }.join
+      end
+      r = hex[0..1].to_i(16)
+      g = hex[2..3].to_i(16)
+      b = hex[4..5].to_i(16)
+      if type == :fg
+        "38;2;#{r};#{g};#{b}"
+      else
+        "48;2;#{r};#{g};#{b}"
+      end
+    end
+
+    def self.resolve_ansi256(n, type)
+      if type == :fg
+        "38;5;#{n}"
+      else
+        "48;5;#{n}"
+      end
+    end
+
+    def self.resolve_ansi_basic(n, type)
+      if type == :fg
+        n < 8 ? (30 + n).to_s : (90 + n - 8).to_s
+      else
+        n < 8 ? (40 + n).to_s : (100 + n - 8).to_s
+      end
+    end
+
+    def self.has_dark_background?
+      bg = ENV["COLORFGBG"]
+      return true if bg.nil?
+      parts = bg.split(";")
+      return true if parts.length < 2
+      parts.last.to_i < 8
+    end
+  end
+
+  module ColorBlend
+    LUV = :luv
+    RGB = :rgb
+    HCL = :hcl
+
+    class << self
+      def blend(c1, c2, t, mode: nil)
+        mode ||= :luv
+        r1, g1, b1 = parse_hex(c1)
+        r2, g2, b2 = parse_hex(c2)
+
+        case mode
+        when :rgb
+          blend_rgb_values(r1, g1, b1, r2, g2, b2, t)
+        when :hcl
+          blend_hcl_values(r1, g1, b1, r2, g2, b2, t)
+        else # :luv
+          blend_luv_values(r1, g1, b1, r2, g2, b2, t)
+        end
+      end
+
+      def blends(c1, c2, steps, mode: nil)
+        mode ||= :luv
+        (0...steps).map do |i|
+          t = steps <= 1 ? 0.5 : i.to_f / (steps - 1)
+          blend(c1, c2, t, mode: mode)
+        end
+      end
+
+      def grid(x0y0, x1y0, x0y1, x1y1, x_steps, y_steps, mode: nil)
+        mode ||= :luv
+        (0...y_steps).map do |y|
+          ty = y_steps <= 1 ? 0.5 : y.to_f / (y_steps - 1)
+          left = blend(x0y0, x0y1, ty, mode: mode)
+          right = blend(x1y0, x1y1, ty, mode: mode)
+          (0...x_steps).map do |x|
+            tx = x_steps <= 1 ? 0.5 : x.to_f / (x_steps - 1)
+            blend(left, right, tx, mode: mode)
+          end
+        end
+      end
+
+      private
+
+      def parse_hex(hex)
+        hex = hex.delete_prefix("#")
+        hex = hex.chars.map { |c| c * 2 }.join if hex.length == 3
+        [hex[0..1].to_i(16) / 255.0, hex[2..3].to_i(16) / 255.0, hex[4..5].to_i(16) / 255.0]
+      end
+
+      def to_hex(r, g, b)
+        r = [[r, 0.0].max, 1.0].min
+        g = [[g, 0.0].max, 1.0].min
+        b = [[b, 0.0].max, 1.0].min
+        "#%02x%02x%02x" % [(r * 255).round, (g * 255).round, (b * 255).round]
+      end
+
+      def blend_rgb_values(r1, g1, b1, r2, g2, b2, t)
+        to_hex(
+          r1 + (r2 - r1) * t,
+          g1 + (g2 - g1) * t,
+          b1 + (b2 - b1) * t
+        )
+      end
+
+      # CIE-L*uv blending (simplified but good enough)
+      def blend_luv_values(r1, g1, b1, r2, g2, b2, t)
+        # Convert to linear RGB, then XYZ, then L*uv, blend, convert back
+        l1, u1, v1 = rgb_to_luv(r1, g1, b1)
+        l2, u2, v2 = rgb_to_luv(r2, g2, b2)
+        l = l1 + (l2 - l1) * t
+        u = u1 + (u2 - u1) * t
+        v = v1 + (v2 - v1) * t
+        r, g, b = luv_to_rgb(l, u, v)
+        to_hex(r, g, b)
+      end
+
+      def blend_hcl_values(r1, g1, b1, r2, g2, b2, t)
+        h1, c1_val, l1 = rgb_to_hcl(r1, g1, b1)
+        h2, c2_val, l2 = rgb_to_hcl(r2, g2, b2)
+
+        # Shortest path interpolation for hue
+        dh = h2 - h1
+        if dh > Math::PI
+          dh -= 2 * Math::PI
+        elsif dh < -Math::PI
+          dh += 2 * Math::PI
+        end
+
+        h = h1 + dh * t
+        c = c1_val + (c2_val - c1_val) * t
+        l = l1 + (l2 - l1) * t
+        r, g, b = hcl_to_rgb(h, c, l)
+        to_hex(r, g, b)
+      end
+
+      # Color space conversion helpers
+      def linearize(v)
+        v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055)**2.4
+      end
+
+      def delinearize(v)
+        v <= 0.0031308 ? v * 12.92 : 1.055 * (v**(1.0 / 2.4)) - 0.055
+      end
+
+      def rgb_to_xyz(r, g, b)
+        rl = linearize(r)
+        gl = linearize(g)
+        bl = linearize(b)
+        x = 0.4124564 * rl + 0.3575761 * gl + 0.1804375 * bl
+        y = 0.2126729 * rl + 0.7151522 * gl + 0.0721750 * bl
+        z = 0.0193339 * rl + 0.1191920 * gl + 0.9503041 * bl
+        [x, y, z]
+      end
+
+      def xyz_to_rgb(x, y, z)
+        r = delinearize( 3.2404542 * x - 1.5371385 * y - 0.4985314 * z)
+        g = delinearize(-0.9692660 * x + 1.8760108 * y + 0.0415560 * z)
+        b = delinearize( 0.0556434 * x - 0.2040259 * y + 1.0572252 * z)
+        [r, g, b]
+      end
+
+      D65_X = 0.95047
+      D65_Y = 1.0
+      D65_Z = 1.08883
+
+      def rgb_to_luv(r, g, b)
+        x, y, z = rgb_to_xyz(r, g, b)
+        l = if y / D65_Y <= (6.0 / 29.0)**3
+              (29.0 / 3.0)**3 * y / D65_Y
+            else
+              116.0 * (y / D65_Y)**(1.0 / 3.0) - 16.0
+            end
+        denom = x + 15.0 * y + 3.0 * z
+        denom_ref = D65_X + 15.0 * D65_Y + 3.0 * D65_Z
+        return [0.0, 0.0, 0.0] if denom < 1e-10
+        u_prime = 4.0 * x / denom
+        v_prime = 9.0 * y / denom
+        u_prime_ref = 4.0 * D65_X / denom_ref
+        v_prime_ref = 9.0 * D65_Y / denom_ref
+        u = 13.0 * l * (u_prime - u_prime_ref)
+        v = 13.0 * l * (v_prime - v_prime_ref)
+        [l, u, v]
+      end
+
+      def luv_to_rgb(l, u, v)
+        return [0.0, 0.0, 0.0] if l <= 1e-10
+        denom_ref = D65_X + 15.0 * D65_Y + 3.0 * D65_Z
+        u_prime_ref = 4.0 * D65_X / denom_ref
+        v_prime_ref = 9.0 * D65_Y / denom_ref
+        u_prime = u / (13.0 * l) + u_prime_ref
+        v_prime = v / (13.0 * l) + v_prime_ref
+        y = if l <= 8.0
+              D65_Y * l * (3.0 / 29.0)**3
+            else
+              D65_Y * ((l + 16.0) / 116.0)**3
+            end
+        return [0.0, 0.0, 0.0] if v_prime.abs < 1e-10
+        x = y * 9.0 * u_prime / (4.0 * v_prime)
+        z = y * (12.0 - 3.0 * u_prime - 20.0 * v_prime) / (4.0 * v_prime)
+        xyz_to_rgb(x, y, z)
+      end
+
+      def rgb_to_hcl(r, g, b)
+        l, u, v = rgb_to_luv(r, g, b)
+        c = Math.sqrt(u * u + v * v)
+        h = Math.atan2(v, u)
+        [h, c, l]
+      end
+
+      def hcl_to_rgb(h, c, l)
+        u = c * Math.cos(h)
+        v = c * Math.sin(h)
+        luv_to_rgb(l, u, v)
+      end
+    end
+  end
 end

@@ -24,12 +24,10 @@ Gem::Specification.new do |spec|
     "LICENSE.txt",
     "README.md",
     "sig/**/*.rbs",
-    "lib/**/*.rb",
-    "ext/**/*.{c,h,rb}",
-    "go/**/*.{go,mod,sum}",
-    "go/build/**/*"
+    "lib/**/*.rb"
   ]
 
   spec.require_paths = ["lib"]
-  spec.extensions = ["ext/lipgloss/extconf.rb"]
+
+  spec.add_dependency "unicode-display_width", "~> 3.0"
 end
