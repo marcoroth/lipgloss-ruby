@@ -12,10 +12,14 @@ module Lipgloss
   def self.has_dark_background?: () -> bool
 
   module Immutable
+    private
+
+    def dup_with: () { (self) -> void } -> self
   end
 
   module Ansi
     ANSI_RE: Regexp
+    RESET: String
     BOLD: String
     FAINT: String
     ITALIC: String
@@ -39,6 +43,15 @@ module Lipgloss
     def self.to_ansi_fg: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value) -> String
     def self.to_ansi_bg: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value) -> String
     def self.has_dark_background?: () -> bool
+
+    private
+
+    def self.resolve_color_code: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value, Symbol type) -> String?
+    def self.resolve_complete_color: (CompleteColor cc, Symbol type) -> String?
+    def self.resolve_string_color: (String? str, Symbol type) -> String?
+    def self.resolve_hex_color: (String hex, Symbol type) -> String
+    def self.resolve_ansi256: (Integer n, Symbol type) -> String
+    def self.resolve_ansi_basic: (Integer n, Symbol type) -> String
   end
 
   class Style
@@ -83,6 +96,8 @@ module Lipgloss
     def align: (*Position::position_value positions) -> Style
     def align_horizontal: (Position::position_value position) -> Style
     def align_vertical: (Position::position_value position) -> Style
+    def _align_horizontal: (Float position) -> Style
+    def _align_vertical: (Float position) -> Style
 
     def padding: (*Integer values) -> Style
     def padding_top: (Integer value) -> Style
@@ -157,6 +172,29 @@ module Lipgloss
     def unset_margin_left: () -> Style
     def unset_border_style: () -> Style
     def unset_inline: () -> Style
+
+    private
+
+    def set_prop: (Symbol key, untyped value) -> void
+    def unset_prop: (Symbol key) -> void
+
+
+    def with: (Symbol prop, untyped value) -> Style
+    def expand_shorthand: (Array[Integer] values) -> [Integer, Integer, Integer, Integer]
+    def convert_tabs: (String str) -> String
+    def apply_max_width: (String str) -> String
+    def word_wrap_line: (String line, Integer max_w) -> Array[String]
+    def apply_width_and_alignment: (String str) -> String
+    def apply_height_and_valign: (String str) -> String
+    def align_line_horizontal: (String line, Integer target_width, Float align) -> String
+    def apply_padding: (String str) -> String
+    def apply_border: (String str) -> String
+    def colorize_border_char: (String char, Symbol side) -> String
+    def apply_margins: (String str) -> String
+    def apply_inline: (String str) -> String
+    def apply_ansi_styles: (String str) -> String
+    def build_ansi_codes: () -> Array[String]
+    def visible_width: (String str) -> Integer
   end
 
   class Table
@@ -183,6 +221,14 @@ module Lipgloss
     def style_func: (rows: Integer, columns: Integer) { (Integer, Integer) -> Style? } -> Table
     def render: () -> String
     def to_s: () -> String
+
+    private
+
+    def calculate_column_widths: (Integer num_cols) -> Array[Integer]
+    def distribute_width: (Array[Integer] col_widths, Integer num_cols) -> Array[Integer]
+    def build_horizontal_border: (Array[Integer] col_widths, Hash[Symbol, String] chars, Symbol position) -> String
+    def build_data_row: (Array[String] row_data, Array[Integer] col_widths, Hash[Symbol, String] chars, Integer row_idx) -> String
+    def style_border_char: (String char) -> String
   end
 
   class List
@@ -224,8 +270,28 @@ module Lipgloss
     RGB: Symbol
     HCL: Symbol
 
+    D65_X: Float
+    D65_Y: Float
+    D65_Z: Float
+
     def self.blend: (String c1, String c2, Float t, ?mode: Symbol?) -> String
     def self.blends: (String c1, String c2, Integer steps, ?mode: Symbol?) -> Array[String]
     def self.grid: (String c1, String c2, String c3, String c4, Integer x, Integer y, ?mode: Symbol?) -> Array[Array[String]]
+
+    private
+
+    def self.parse_hex: (String hex) -> [Float, Float, Float]
+    def self.to_hex: (Float r, Float g, Float b) -> String
+    def self.blend_rgb_values: (Float r1, Float g1, Float b1, Float r2, Float g2, Float b2, Float t) -> String
+    def self.blend_luv_values: (Float r1, Float g1, Float b1, Float r2, Float g2, Float b2, Float t) -> String
+    def self.blend_hcl_values: (Float r1, Float g1, Float b1, Float r2, Float g2, Float b2, Float t) -> String
+    def self.linearize: (Float v) -> Float
+    def self.delinearize: (Float v) -> Float
+    def self.rgb_to_xyz: (Float r, Float g, Float b) -> [Float, Float, Float]
+    def self.xyz_to_rgb: (Float x, Float y, Float z) -> [Float, Float, Float]
+    def self.rgb_to_luv: (Float r, Float g, Float b) -> [Float, Float, Float]
+    def self.luv_to_rgb: (Float l, Float u, Float v) -> [Float, Float, Float]
+    def self.rgb_to_hcl: (Float r, Float g, Float b) -> [Float, Float, Float]
+    def self.hcl_to_rgb: (Float h, Float c, Float l) -> [Float, Float, Float]
   end
 end

@@ -1,8 +1,2 @@
 # Generated from lib/lipgloss/style.rb with RBS::Inline
-
-module Lipgloss
-  class Style
-    def _align_horizontal: (Float position) -> Style
-    def _align_vertical: (Float position) -> Style
-  end
-end
+# All declarations are in sig/lipgloss/lipgloss.rbs

@@ -44,5 +44,11 @@ module Lipgloss
     OUTER_HALF_BLOCK: ::Symbol
 
     INNER_HALF_BLOCK: ::Symbol
+
+    MARKDOWN: ::Symbol
+
+    CHARS: Hash[Symbol, Hash[Symbol, String]]
+
+    def self.chars_for: (Symbol | Hash[Symbol, String] border_type) -> Hash[Symbol, String]
   end
 end
