@@ -38,6 +38,38 @@ module Lipgloss
       [width(string), height(string)]
     end
 
+    # Truncate a string to max_width visible characters, preserving ANSI escape sequences
+    def self.truncate(str, max_width) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      return str if width(str) <= max_width
+
+      result = +""
+      current_width = 0
+      in_escape = false
+      escape_buf = +""
+
+      str.each_char do |ch|
+        if in_escape
+          escape_buf << ch
+          if ch.match?(/[A-Za-z]/)
+            result << escape_buf
+            in_escape = false
+            escape_buf = +""
+          end
+        elsif ch == "\e"
+          in_escape = true
+          escape_buf = +ch.dup
+        else
+          ch_width = Unicode::DisplayWidth.of(ch)
+          break if current_width + ch_width > max_width
+
+          result << ch
+          current_width += ch_width
+        end
+      end
+
+      result
+    end # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
     # Apply ANSI SGR codes to text
     # codes is an array of ANSI escape strings like ["\e[1m", "\e[38;2;255;0;0m"]
     def self.apply(text, codes)

@@ -12,59 +12,25 @@ Style/StringLiteralsInInterpolation:
 Style/Documentation:
   Enabled: false
 
-Style/GlobalVars:
-  Exclude:
-    - ext/lipgloss/extconf.rb
-
 Metrics/MethodLength:
   Max: 20
-  Exclude:
-    - lib/lipgloss/style.rb
-    - lib/lipgloss/table.rb
-    - lib/lipgloss/tree.rb
 
 Metrics/ClassLength:
   Max: 200
   Exclude:
     - test/**
-    - lib/lipgloss/style.rb
 
 Metrics/ModuleLength:
   Max: 100
-  Exclude:
-    - lib/lipgloss/color.rb
 
 Metrics/BlockLength:
   Max: 50
 
 Metrics/CyclomaticComplexity:
   Max: 10
-  Exclude:
-    - lib/lipgloss/style.rb
-    - lib/lipgloss/table.rb
-    - lib/lipgloss/tree.rb
-    - lib/lipgloss/renderer.rb
-
-Metrics/PerceivedComplexity:
-  Exclude:
-    - lib/lipgloss/style.rb
-    - lib/lipgloss/table.rb
-    - lib/lipgloss/tree.rb
-    - lib/lipgloss/renderer.rb
-
-Metrics/AbcSize:
-  Exclude:
-    - lib/lipgloss/style.rb
-    - lib/lipgloss/table.rb
-    - lib/lipgloss/tree.rb
-    - lib/lipgloss/color.rb
-    - lib/lipgloss/list.rb
-    - lib/lipgloss/renderer.rb
 
 Metrics/ParameterLists:
   Max: 10
-  Exclude:
-    - lib/lipgloss/style.rb
 
 Naming/MethodParameterName:
   AllowedNames:
@@ -92,25 +58,8 @@ Naming/MethodParameterName:
     - b2
     - cc
 
-Naming/PredicatePrefix:
-  Exclude:
-    - lib/lipgloss/color.rb
-    - lib/lipgloss/renderer.rb
-
-Naming/AccessorMethodName:
-  Exclude:
-    - lib/lipgloss/style.rb
-
-Lint/UselessConstantScoping:
-  Exclude:
-    - lib/lipgloss/color.rb
-
 Layout/LineLength:
   Enabled: false
-
-Security/Eval:
-  Exclude:
-    - Rakefile
 
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true

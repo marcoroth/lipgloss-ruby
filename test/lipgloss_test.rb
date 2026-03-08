@@ -29,5 +29,23 @@ module Lipgloss
     it "has no tab conversion constant" do
       assert_equal(-1, Lipgloss::NO_TAB_CONVERSION)
     end
+
+    # ---- Ansi module ----
+
+    it "strips ANSI codes" do
+      assert_equal "Hello", Ansi.strip("\e[1mHello\e[0m")
+      assert_equal "test", Ansi.strip("\e[38;2;255;0;0mtest\e[0m")
+    end
+
+    it "calculates width correctly" do
+      assert_equal 5, Ansi.width("Hello")
+      assert_equal 5, Ansi.width("\e[1mHello\e[0m")
+      assert_equal 5, Ansi.width("Hello\nHi")
+    end
+
+    it "calculates height correctly" do
+      assert_equal 1, Ansi.height("Hello")
+      assert_equal 3, Ansi.height("A\nB\nC")
+    end
   end
 end

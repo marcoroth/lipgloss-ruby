@@ -87,7 +87,7 @@ module Lipgloss
                            .enumerator_style(style)
 
       result = strip_ansi(tree.render)
-      expected = "Root\n└──A"
+      expected = "Root\n└── A"
 
       assert_equal expected, result
     end
@@ -156,6 +156,16 @@ module Lipgloss
       result = strip_ansi(tree.render)
       expected = "Root\n├── A\n├── B\n╰── C"
 
+      assert_equal expected, result
+    end
+
+    it "renders deeply nested tree" do
+      inner = Tree.root("C").child("D")
+      mid = Tree.root("B").child(inner)
+      tree = Tree.root("A").child(mid)
+
+      result = strip_ansi(tree.render)
+      expected = "A\n└── B\n    └── C\n        └── D"
       assert_equal expected, result
     end
   end

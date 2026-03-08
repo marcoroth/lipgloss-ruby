@@ -32,12 +32,19 @@ module Lipgloss
     def self.width: (String str) -> Integer
     def self.height: (String str) -> Integer
     def self.size: (String str) -> [Integer, Integer]
+    def self.truncate: (String str, Integer max_width) -> String
     def self.apply: (String str, Array[String] codes) -> String
     def self.apply_per_line: (String str, Array[String] codes) -> String
   end
 
   module Color
+    PROFILE_TRUE_COLOR: Symbol
+    PROFILE_ANSI256: Symbol
+    PROFILE_ANSI: Symbol
+    PROFILE_ASCII: Symbol
+
     def self.profile: () -> Symbol
+    def self.profile=: (Symbol value) -> Symbol
     def self.detect_profile: () -> Symbol
     def self.reset_profile!: () -> void
     def self.to_ansi_fg: (String | AdaptiveColor | CompleteColor | CompleteAdaptiveColor color_value) -> String
@@ -183,8 +190,12 @@ module Lipgloss
     def expand_shorthand: (Array[Integer] values) -> [Integer, Integer, Integer, Integer]
     def convert_tabs: (String str) -> String
     def apply_max_width: (String str) -> String
+    def apply_max_height: (String str) -> String
+    def truncate_line: (String line, Integer max_w) -> String
     def word_wrap_line: (String line, Integer max_w) -> Array[String]
-    def apply_width_and_alignment: (String str) -> String
+    def apply_wrapping: (String str) -> String
+    def apply_horizontal_alignment: (String str) -> String
+    def horizontal_padding: () -> Integer
     def apply_height_and_valign: (String str) -> String
     def align_line_horizontal: (String line, Integer target_width, Float align) -> String
     def apply_padding: (String str) -> String
@@ -218,7 +229,7 @@ module Lipgloss
     def width: (Integer width) -> Table
     def height: (Integer height) -> Table
     def clear_rows: () -> Table
-    def style_func: (rows: Integer, columns: Integer) { (Integer, Integer) -> Style? } -> Table
+    def style_func: (?rows: Integer?, ?columns: Integer?) { (Integer, Integer) -> Style? } -> Table
     def render: () -> String
     def to_s: () -> String
 

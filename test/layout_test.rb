@@ -61,5 +61,32 @@ module Lipgloss
       result = Lipgloss.has_dark_background?
       assert [true, false].include?(result)
     end
+
+    it "join_horizontal normalizes line widths within blocks" do
+      # Block A has lines of different widths
+      block_a = "Short\nLonger line"
+      block_b = "X\nY"
+
+      result = Lipgloss.join_horizontal(:top, block_a, block_b)
+      lines = result.split("\n")
+
+      # "Short" should be padded to match "Longer line" width (11)
+      # so block_b starts at the same column on both lines
+      assert_equal lines[0].index("X"), lines[1].index("Y"),
+                   "Second block should start at the same column on all lines"
+    end
+
+    it "join_horizontal pads ragged blocks correctly" do
+      block_a = "A\nBBB"
+      block_b = "1\n2"
+
+      result = Lipgloss.join_horizontal(:top, block_a, block_b)
+      lines = result.split("\n")
+
+      # Line 0: "A  1" (A padded to 3 + 1)
+      # Line 1: "BBB2"
+      assert_equal "A  1", lines[0]
+      assert_equal "BBB2", lines[1]
+    end
   end
 end

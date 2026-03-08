@@ -2,7 +2,7 @@
 
 module Lipgloss
   class << self
-    def _join_horizontal(position, strings)
+    def _join_horizontal(position, strings) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       return "" if strings.empty?
       return strings.first if strings.length == 1
 
@@ -10,9 +10,14 @@ module Lipgloss
       blocks = strings.map { |s| s.split("\n", -1) }
       max_height = blocks.map(&:length).max
 
-      # Pad each block to max_height based on position
+      # Normalize line widths within each block, then pad to max_height
       blocks = blocks.map do |lines|
         content_width = lines.map { |l| Ansi.width(l) }.max || 0
+        # Pad each line to the block's max width
+        lines = lines.map do |l|
+          lw = Ansi.width(l)
+          lw < content_width ? l + (" " * (content_width - lw)) : l
+        end
         if lines.length < max_height
           gap = max_height - lines.length
           top = (gap * position).floor
@@ -28,9 +33,9 @@ module Lipgloss
       (0...max_height).map do |i|
         blocks.map { |lines| lines[i] || "" }.join
       end.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-    def _join_vertical(position, strings)
+    def _join_vertical(position, strings) # rubocop:disable Metrics/AbcSize
       return "" if strings.empty?
 
       # Split all strings into lines
@@ -49,7 +54,7 @@ module Lipgloss
           line
         end
       end.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize
 
     def width(string)
       Ansi.width(string)
@@ -83,7 +88,7 @@ module Lipgloss
       end.join("\n")
     end
 
-    def _place_vertical(height, position, string)
+    def _place_vertical(height, position, string) # rubocop:disable Metrics/AbcSize
       lines = string.split("\n", -1)
       return lines.join("\n") if lines.length >= height
 
@@ -93,10 +98,10 @@ module Lipgloss
       bottom = gap - top
       blank = " " * content_width
       (Array.new(top, blank) + lines + Array.new(bottom, blank)).join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize
 
-    def has_dark_background?
+    def has_dark_background? # rubocop:disable Naming/PredicatePrefix
       Color.has_dark_background?
-    end
+    end # rubocop:enable Naming/PredicatePrefix
   end
 end

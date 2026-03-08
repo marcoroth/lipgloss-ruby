@@ -50,7 +50,7 @@ module Lipgloss
       dup_with { |t| t.instance_variable_set(:@root_style, style) }
     end
 
-    def render
+    def render # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       lines = []
 
       # Root
@@ -73,7 +73,7 @@ module Lipgloss
           # First line of subtree (the root)
           sub_root = sub_lines[0]
           styled_prefix = if @enumerator_style
-                            @enumerator_style.render(prefix.rstrip)
+                            "#{@enumerator_style.render(prefix.rstrip)} "
                           else
                             prefix
                           end
@@ -91,7 +91,7 @@ module Lipgloss
           item_text = @item_style.render(item_text) if @item_style
 
           styled_prefix = if @enumerator_style
-                            @enumerator_style.render(prefix.rstrip)
+                            "#{@enumerator_style.render(prefix.rstrip)} "
                           else
                             prefix
                           end
@@ -101,7 +101,7 @@ module Lipgloss
       end
 
       lines.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
     alias to_s render
   end

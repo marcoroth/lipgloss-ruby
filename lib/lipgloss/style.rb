@@ -2,7 +2,7 @@
 # rbs_inline: enabled
 
 module Lipgloss
-  class Style
+  class Style # rubocop:disable Metrics/ClassLength
     include Immutable
 
     # Default tab width
@@ -31,19 +31,22 @@ module Lipgloss
 
     # ---- Render pipeline ----
 
-    def render(text = nil)
+    def render(text = nil) # rubocop:disable Metrics/AbcSize
       str = (text || @props[:string_value] || "").to_s
 
       str = convert_tabs(str)
-      str = apply_max_width(str) if @set[:max_width] && @props[:max_width].positive?
-      str = apply_width_and_alignment(str)
-      str = apply_height_and_valign(str)
+      str = apply_inline(str) if @props[:inline]
+      str = apply_wrapping(str)
+      str = apply_ansi_styles(str)
       str = apply_padding(str)
+      str = apply_height_and_valign(str)
+      str = apply_horizontal_alignment(str)
       str = apply_border(str)
       str = apply_margins(str)
-      str = apply_inline(str) if @props[:inline]
-      apply_ansi_styles(str)
-    end
+      str = apply_max_width(str) if @set[:max_width] && @props[:max_width].positive?
+      str = apply_max_height(str) if @set[:max_height] && @props[:max_height].positive?
+      str
+    end # rubocop:enable Metrics/AbcSize
 
     def to_s
       render(@props[:string_value])
@@ -73,23 +76,23 @@ module Lipgloss
 
     # ---- Color getters ----
 
-    def get_foreground
+    def get_foreground # rubocop:disable Naming/AccessorMethodName
       c = @props[:foreground]
       if c.is_a?(String)
         c.empty? ? nil : c
       else
         c&.to_s
       end
-    end
+    end # rubocop:enable Naming/AccessorMethodName
 
-    def get_background
+    def get_background # rubocop:disable Naming/AccessorMethodName
       c = @props[:background]
       if c.is_a?(String)
         c.empty? ? nil : c
       else
         c&.to_s
       end
-    end
+    end # rubocop:enable Naming/AccessorMethodName
 
     # ---- Size setters ----
 
@@ -109,13 +112,13 @@ module Lipgloss
       with(:max_height, value)
     end
 
-    def get_width
+    def get_width # rubocop:disable Naming/AccessorMethodName
       @props[:width]
-    end
+    end # rubocop:enable Naming/AccessorMethodName
 
-    def get_height
+    def get_height # rubocop:disable Naming/AccessorMethodName
       @props[:height]
-    end
+    end # rubocop:enable Naming/AccessorMethodName
 
     # ---- Alignment ----
 
@@ -178,7 +181,7 @@ module Lipgloss
 
     # ---- Border ----
 
-    def border(border_sym, *sides)
+    def border(border_sym, *sides) # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity
       dup_with do |s|
         s.set_prop(:border_type, border_sym)
         if sides.empty?
@@ -193,13 +196,13 @@ module Lipgloss
           s.set_prop(:border_left, sides[3] || false) if sides.length > 3
         end
       end
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
 
     def border_style(border_sym)
       with(:border_type, border_sym)
     end
 
-    def border_custom(top: "", bottom: "", left: "", right: "",
+    def border_custom(top: "", bottom: "", left: "", right: "", # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Metrics/ParameterLists
                       top_left: "", top_right: "", bottom_left: "", bottom_right: "",
                       middle_left: "", middle_right: "", middle: "",
                       middle_top: "", middle_bottom: "")
@@ -249,7 +252,7 @@ module Lipgloss
         s.set_prop(:border_bottom, has_bottom)
         s.set_prop(:border_left, has_left || needs_side_space)
       end
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Metrics/ParameterLists
 
     [:border_top, :border_right, :border_bottom, :border_left].each do |prop|
       define_method(prop) do |value|
@@ -299,9 +302,9 @@ module Lipgloss
       with(:tab_width, value)
     end
 
-    def set_string(string)
+    def set_string(string) # rubocop:disable Naming/AccessorMethodName
       with(:string_value, string)
-    end
+    end # rubocop:enable Naming/AccessorMethodName
 
     # ---- Inherit ----
 
@@ -368,18 +371,29 @@ module Lipgloss
       return str if max_w <= 0
 
       lines = str.split("\n", -1)
-      result = []
-      lines.each do |line|
-        if visible_width(line) <= max_w
-          result << line
-        else
-          result.concat(word_wrap_line(line, max_w))
-        end
-      end
-      result.join("\n")
+      lines.map { |line| truncate_line(line, max_w) }.join("\n")
     end
 
-    def word_wrap_line(line, max_w)
+    def apply_max_height(str)
+      max_h = @props[:max_height]
+      return str if max_h <= 0
+
+      lines = str.split("\n", -1)
+      return str if lines.length <= max_h
+
+      lines[0...max_h].join("\n")
+    end
+
+    def truncate_line(line, max_w)
+      return line if visible_width(line) <= max_w
+
+      has_ansi = line.include?("\e[")
+      result = Ansi.truncate(line, max_w)
+      result << Ansi::RESET if has_ansi
+      result
+    end
+
+    def word_wrap_line(line, max_w) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
       result = []
       words = line.split(/( +)/)
       current_line = ""
@@ -413,9 +427,28 @@ module Lipgloss
       end
       result << current_line unless current_line.empty?
       result
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-    def apply_width_and_alignment(str)
+    def apply_wrapping(str) # rubocop:disable Metrics/AbcSize
+      w = @props[:width]
+      return str if !@set[:width] || w <= 0 || @props[:inline]
+
+      content_w = w - horizontal_padding
+      return str unless content_w.positive?
+
+      lines = str.split("\n", -1)
+      wrapped = []
+      lines.each do |line|
+        if visible_width(line) > content_w
+          wrapped.concat(word_wrap_line(line, content_w))
+        else
+          wrapped << line
+        end
+      end
+      wrapped.join("\n")
+    end # rubocop:enable Metrics/AbcSize
+
+    def apply_horizontal_alignment(str)
       w = @props[:width]
       return str if !@set[:width] || w <= 0
 
@@ -425,7 +458,7 @@ module Lipgloss
       lines.map { |line| align_line_horizontal(line, w, h_align) }.join("\n")
     end
 
-    def apply_height_and_valign(str)
+    def apply_height_and_valign(str) # rubocop:disable Metrics/AbcSize
       h = @props[:height]
       return str if !@set[:height] || h <= 0
 
@@ -443,6 +476,10 @@ module Lipgloss
       end
 
       lines.join("\n")
+    end # rubocop:enable Metrics/AbcSize
+
+    def horizontal_padding
+      @props[:padding_left] + @props[:padding_right]
     end
 
     def align_line_horizontal(line, target_width, align)
@@ -455,7 +492,7 @@ module Lipgloss
       (" " * left) + line + (" " * right)
     end
 
-    def apply_padding(str)
+    def apply_padding(str) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       pt = @props[:padding_top]
       pr = @props[:padding_right]
       pb = @props[:padding_bottom]
@@ -488,9 +525,9 @@ module Lipgloss
       end
 
       lines.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-    def apply_border(str)
+    def apply_border(str) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       bt = @props[:border_type]
       return str unless bt
 
@@ -539,7 +576,7 @@ module Lipgloss
       end
 
       result.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
     def colorize_border_char(char, side)
       return char if char.empty?
@@ -561,7 +598,7 @@ module Lipgloss
       end
     end
 
-    def apply_margins(str)
+    def apply_margins(str) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       mt = @props[:margin_top]
       mr = @props[:margin_right]
       mb = @props[:margin_bottom]
@@ -592,20 +629,22 @@ module Lipgloss
       end
 
       lines.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
     def apply_inline(str)
       str.gsub("\n", "")
     end
 
     def apply_ansi_styles(str)
+      return str if Lipgloss::Color.profile == Lipgloss::Color::PROFILE_ASCII
+
       codes = build_ansi_codes
       return str if codes.empty?
 
       Lipgloss::Ansi.apply_per_line(str, codes)
     end
 
-    def build_ansi_codes
+    def build_ansi_codes # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       codes = []
       codes << Lipgloss::Ansi::BOLD if @props[:bold]
       codes << Lipgloss::Ansi::FAINT if @props[:faint]
@@ -626,11 +665,11 @@ module Lipgloss
       end
 
       codes
-    end
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     # Calculate visible width of a string (strips ANSI, handles Unicode)
     def visible_width(str)
       Lipgloss::Ansi.width(str)
     end
-  end
+  end # rubocop:enable Metrics/ClassLength
 end

@@ -44,7 +44,7 @@ module Lipgloss
       dup_with { |l| l.instance_variable_set(:@item_style, style) }
     end
 
-    def render(indent: 0)
+    def render(indent: 0) # rubocop:disable Metrics/AbcSize
       lines = []
       total = @items.length
 
@@ -53,10 +53,11 @@ module Lipgloss
           nested = cur_item.render(indent: indent + 2)
           lines << nested
         else
-          prefix = ENUMERATORS[@enumerator_type].call(i, total)
+          enumerator_fn = ENUMERATORS[@enumerator_type] || ENUMERATORS[:bullet]
+          prefix = enumerator_fn.call(i, total)
 
           styled_prefix = if @enumerator_style
-                            @enumerator_style.render(prefix.rstrip)
+                            "#{@enumerator_style.render(prefix.rstrip)} "
                           else
                             prefix
                           end
@@ -69,7 +70,7 @@ module Lipgloss
       end
 
       lines.join("\n")
-    end
+    end # rubocop:enable Metrics/AbcSize
 
     def to_s
       render

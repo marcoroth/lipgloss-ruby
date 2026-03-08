@@ -143,5 +143,28 @@ module Lipgloss
         assert(grid.flatten.all? { |c| c.match?(/^#[0-9a-f]{6}$/) })
       end
     end
+
+    describe "Color module" do
+      it "generates foreground ANSI code from hex" do
+        assert_equal "\e[38;2;255;0;0m", Color.to_ansi_fg("#FF0000")
+        assert_equal "\e[38;2;255;0;0m", Color.to_ansi_fg("#F00")
+      end
+
+      it "generates background ANSI code from hex" do
+        assert_equal "\e[48;2;0;255;0m", Color.to_ansi_bg("#00FF00")
+      end
+
+      it "handles adaptive color" do
+        color = AdaptiveColor.new(light: "#000000", dark: "#FFFFFF")
+        result = Color.to_ansi_fg(color)
+        refute_empty result
+      end
+
+      it "handles complete color" do
+        color = CompleteColor.new(true_color: "#FF0000", ansi256: "196", ansi: "9")
+        result = Color.to_ansi_fg(color)
+        refute_empty result
+      end
+    end
   end
 end

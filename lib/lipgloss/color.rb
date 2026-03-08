@@ -131,23 +131,59 @@ module Lipgloss
     end
   end
 
-  module Color
+  module Color # rubocop:disable Metrics/ModuleLength
+    # Color profiles (matching Go termenv)
+    PROFILE_TRUE_COLOR = :true_color
+    PROFILE_ANSI256 = :ansi256
+    PROFILE_ANSI = :ansi
+    PROFILE_ASCII = :ascii
+
     # Detect terminal color profile from environment (cached)
     def self.profile
       @profile ||= detect_profile
     end
 
-    def self.detect_profile
-      if ENV["TERM"]&.include?("256color")
-        :ansi256
-      else
-        :true_color
-      end
+    # Allow overriding the detected profile
+    def self.profile=(value)
+      @profile = value
     end
 
     def self.reset_profile!
       @profile = nil
     end
+
+    def self.detect_profile # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      # No color when output is not a TTY (piped)
+      return PROFILE_ASCII unless $stdout.tty?
+
+      # NO_COLOR convention (https://no-color.org)
+      return PROFILE_ASCII if ENV.key?("NO_COLOR")
+
+      # GOOGLE_CLOUD_SHELL
+      return PROFILE_TRUE_COLOR if ENV["GOOGLE_CLOUD_SHELL"] == "true"
+
+      colorterm = ENV.fetch("COLORTERM", "")
+      term = ENV.fetch("TERM", "")
+      term_program = ENV.fetch("TERM_PROGRAM", "")
+
+      # COLORTERM=truecolor or 24bit
+      return PROFILE_TRUE_COLOR if colorterm =~ /truecolor|24bit/i
+
+      # Known truecolor terminals
+      return PROFILE_TRUE_COLOR if ["iTerm.app", "WezTerm", "Hyper"].include?(term_program)
+      return PROFILE_TRUE_COLOR if term.match?(/\A(alacritty|wezterm|xterm-kitty|contour|tmux)/)
+
+      # COLORTERM=yes or true
+      return PROFILE_ANSI256 if colorterm =~ /\A(yes|true)\z/i
+
+      # TERM-based detection
+      return PROFILE_ANSI256 if term.include?("256color")
+      return PROFILE_ANSI if term.include?("color") || term.include?("ansi")
+      return PROFILE_ASCII if term == "dumb"
+
+      # Default: assume truecolor for modern terminals
+      PROFILE_TRUE_COLOR
+    end # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     # Convert a color value to foreground ANSI escape code
     # Accepts: hex string (#RGB or #RRGGBB), ANSI number string, AdaptiveColor, CompleteColor, CompleteAdaptiveColor
@@ -163,6 +199,8 @@ module Lipgloss
     end
 
     def self.resolve_color_code(color_value, type)
+      return nil if profile == PROFILE_ASCII
+
       case color_value
       when CompleteAdaptiveColor
         cc = has_dark_background? ? color_value.dark : color_value.light
@@ -230,7 +268,7 @@ module Lipgloss
       end
     end
 
-    def self.has_dark_background?
+    def self.has_dark_background? # rubocop:disable Naming/PredicatePrefix
       bg = ENV.fetch("COLORFGBG", nil)
       return true if bg.nil?
 
@@ -238,10 +276,10 @@ module Lipgloss
       return true if parts.length < 2
 
       parts.last.to_i < 8
-    end
-  end
+    end # rubocop:enable Naming/PredicatePrefix
+  end # rubocop:enable Metrics/ModuleLength
 
-  module ColorBlend
+  module ColorBlend # rubocop:disable Metrics/ModuleLength
     LUV = :luv
     RGB = :rgb
     HCL = :hcl
@@ -307,7 +345,7 @@ module Lipgloss
       end
 
       # CIE-L*uv blending (simplified but good enough)
-      def blend_luv_values(r1, g1, b1, r2, g2, b2, t)
+      def blend_luv_values(r1, g1, b1, r2, g2, b2, t) # rubocop:disable Metrics/AbcSize
         # Convert to linear RGB, then XYZ, then L*uv, blend, convert back
         l1, u1, v1 = rgb_to_luv(r1, g1, b1)
         l2, u2, v2 = rgb_to_luv(r2, g2, b2)
@@ -316,9 +354,9 @@ module Lipgloss
         v = v1 + ((v2 - v1) * t)
         r, g, b = luv_to_rgb(l, u, v)
         to_hex(r, g, b)
-      end
+      end # rubocop:enable Metrics/AbcSize
 
-      def blend_hcl_values(r1, g1, b1, r2, g2, b2, t)
+      def blend_hcl_values(r1, g1, b1, r2, g2, b2, t) # rubocop:disable Metrics/AbcSize
         h1, c1_val, l1 = rgb_to_hcl(r1, g1, b1)
         h2, c2_val, l2 = rgb_to_hcl(r2, g2, b2)
 
@@ -335,7 +373,7 @@ module Lipgloss
         l = l1 + ((l2 - l1) * t)
         r, g, b = hcl_to_rgb(h, c, l)
         to_hex(r, g, b)
-      end
+      end # rubocop:enable Metrics/AbcSize
 
       # Color space conversion helpers
       def linearize(v)
@@ -346,7 +384,7 @@ module Lipgloss
         v <= 0.0031308 ? v * 12.92 : (1.055 * (v**(1.0 / 2.4))) - 0.055
       end
 
-      def rgb_to_xyz(r, g, b)
+      def rgb_to_xyz(r, g, b) # rubocop:disable Metrics/AbcSize
         rl = linearize(r)
         gl = linearize(g)
         bl = linearize(b)
@@ -354,20 +392,22 @@ module Lipgloss
         y = (0.2126729 * rl) + (0.7151522 * gl) + (0.0721750 * bl)
         z = (0.0193339 * rl) + (0.1191920 * gl) + (0.9503041 * bl)
         [x, y, z]
-      end
+      end # rubocop:enable Metrics/AbcSize
 
-      def xyz_to_rgb(x, y, z)
+      def xyz_to_rgb(x, y, z) # rubocop:disable Metrics/AbcSize
         r = delinearize((3.2404542 * x) - (1.5371385 * y) - (0.4985314 * z))
         g = delinearize((-0.9692660 * x) + (1.8760108 * y) + (0.0415560 * z))
         b = delinearize((0.0556434 * x) - (0.2040259 * y) + (1.0572252 * z))
         [r, g, b]
-      end
+      end # rubocop:enable Metrics/AbcSize
 
+      # rubocop:disable Lint/UselessConstantScoping
       D65_X = 0.95047
       D65_Y = 1.0
       D65_Z = 1.08883
+      # rubocop:enable Lint/UselessConstantScoping
 
-      def rgb_to_luv(r, g, b)
+      def rgb_to_luv(r, g, b) # rubocop:disable Metrics/AbcSize
         x, y, z = rgb_to_xyz(r, g, b)
         l = if y / D65_Y <= (6.0 / 29.0)**3
               ((29.0 / 3.0)**3) * y / D65_Y
@@ -385,9 +425,9 @@ module Lipgloss
         u = 13.0 * l * (u_prime - u_prime_ref)
         v = 13.0 * l * (v_prime - v_prime_ref)
         [l, u, v]
-      end
+      end # rubocop:enable Metrics/AbcSize
 
-      def luv_to_rgb(l, u, v)
+      def luv_to_rgb(l, u, v) # rubocop:disable Metrics/AbcSize
         return [0.0, 0.0, 0.0] if l <= 1e-10
 
         denom_ref = D65_X + (15.0 * D65_Y) + (3.0 * D65_Z)
@@ -405,7 +445,7 @@ module Lipgloss
         x = y * 9.0 * u_prime / (4.0 * v_prime)
         z = y * (12.0 - (3.0 * u_prime) - (20.0 * v_prime)) / (4.0 * v_prime)
         xyz_to_rgb(x, y, z)
-      end
+      end # rubocop:enable Metrics/AbcSize
 
       def rgb_to_hcl(r, g, b)
         l, u, v = rgb_to_luv(r, g, b)
@@ -420,5 +460,5 @@ module Lipgloss
         luv_to_rgb(l, u, v)
       end
     end
-  end
+  end # rubocop:enable Metrics/ModuleLength
 end
