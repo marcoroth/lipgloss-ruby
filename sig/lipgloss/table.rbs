@@ -1,16 +1,1 @@
 # Generated from lib/lipgloss/table.rb with RBS::Inline
-
-module Lipgloss
-  class Table
-    # Header row constant (used in style_func)
-    HEADER_ROW: ::Integer
-
-    # Set a style function that determines the style for each cell
-    #
-    # @rbs rows: Integer -- number of data rows in the table
-    # @rbs columns: Integer -- number of columns in the table
-    # @rbs &block: (Integer, Integer) -> Style? -- block called for each cell position
-    # @rbs return: Table -- a new table with the style function applied
-    def style_func: (rows: Integer, columns: Integer) { (Integer, Integer) -> Style? } -> Table
-  end
-end
