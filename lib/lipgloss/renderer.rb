@@ -103,5 +103,9 @@ module Lipgloss
     def has_dark_background? # rubocop:disable Naming/PredicatePrefix
       Color.has_dark_background?
     end # rubocop:enable Naming/PredicatePrefix
+
+    def version
+      VERSION
+    end
   end
 end
