@@ -113,7 +113,7 @@ module Lipgloss
                            .enumerator_style(style)
 
       result = strip_ansi(list.render)
-      expected = "•A\n•B"
+      expected = "• A\n• B"
 
       assert_equal expected, result
     end
@@ -152,6 +152,16 @@ module Lipgloss
       expected = "1. A\n2. B\n3. C"
 
       assert_equal expected, result
+    end
+
+    it "renders nested list inheriting parent enumerator" do
+      inner = List.new("X", "Y").enumerator(:arabic)
+      outer = List.new.item("Main").item(inner)
+
+      result = strip_ansi(outer.render)
+      assert_includes result, "• Main"
+      assert_includes result, "  1. X"
+      assert_includes result, "  2. Y"
     end
   end
 end

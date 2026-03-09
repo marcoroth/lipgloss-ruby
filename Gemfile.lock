@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     lipgloss (0.2.2)
+      unicode-display_width (~> 3.0)
 
 GEM
   remote: https://rubygems.org/

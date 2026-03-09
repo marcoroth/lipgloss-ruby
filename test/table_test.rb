@@ -221,5 +221,150 @@ module Lipgloss
 
       refute_equal table1.object_id, table2.object_id
     end
+
+    it "renders table with border_row enabled" do
+      table = Table.new
+                   .headers(["X"])
+                   .rows([["A"], ["B"]])
+                   .border(:normal)
+                   .border_row(true)
+
+      result = strip_ansi(table.render)
+      assert_includes result, "├─┤"
+    end
+
+    it "applies border_style to table borders" do
+      border_s = Style.new.foreground("#FF0000")
+      table = Table.new
+                   .headers(["X"])
+                   .rows([["Y"]])
+                   .border_style(border_s)
+
+      result = table.render
+      assert_includes result, "\e["
+      assert_equal "╭─╮\n│X│\n├─┤\n│Y│\n╰─╯", strip_ansi(result)
+    end
+
+    it "uses bottom char for row separators and top char for header separator" do
+      t = Table.new
+               .headers(["A", "B"])
+               .rows([["1", "2"], ["3", "4"]])
+               .border(:thick)
+               .border_row(true)
+
+      output = t.render
+      lines = output.split("\n")
+      assert_includes lines[2], "━"
+      assert_includes lines[4], "━"
+    end
+
+    it "renders outer_half_block border with empty middle chars" do
+      t = Table.new
+               .headers(["A", "B"])
+               .rows([["1", "2"]])
+               .border(:outer_half_block)
+
+      output = t.render
+      lines = output.split("\n")
+      widths = lines.map { |l| Ansi.width(l) }
+      assert_equal 1, widths.uniq.length, "All lines should be the same width"
+      assert_equal false, lines[2].include?("▌"), "Header separator should not have middle_left"
+    end
+
+    # ---- Table shrinks columns when content exceeds target width ----
+
+    it "shrinks columns when content exceeds width" do
+      table = Table.new
+                   .headers(["LongHeader1", "LongHeader2"])
+                   .rows([["data1", "data2"]])
+                   .width(15)
+
+      result = strip_ansi(table.render)
+      lines = result.split("\n")
+      lines.each do |line|
+        assert line.length <= 15, "Line should be <= 15 chars: '#{line}' (#{line.length})"
+      end
+    end
+
+    it "shrinks widest column first" do
+      table = Table.new
+                   .headers(["X", "VeryLongColumn"])
+                   .rows([["A", "B"]])
+                   .width(10)
+
+      result = strip_ansi(table.render)
+      lines = result.split("\n")
+      lines.each do |line|
+        assert line.length <= 10, "Line should be <= 10 chars: '#{line}' (#{line.length})"
+      end
+    end
+
+    # ---- Table style_func lazy evaluation ----
+
+    it "style_func works without rows/columns params" do
+      bold_style = Style.new.bold(true)
+
+      table = Table.new
+                   .headers(["A", "B"])
+                   .rows([["1", "2"], ["3", "4"]])
+                   .style_func do |row, _col|
+                     row == Table::HEADER_ROW ? bold_style : nil
+                   end
+
+      result = strip_ansi(table.render)
+      expected = "╭─┬─╮\n│A│B│\n├─┼─┤\n│1│2│\n│3│4│\n╰─┴─╯"
+      assert_equal expected, result
+    end
+
+    it "style_func evaluates lazily during render" do
+      call_count = 0
+      table = Table.new
+                   .headers(["X"])
+                   .rows([["Y"]])
+                   .style_func do |_row, _col|
+                     call_count += 1
+                     nil
+                   end
+
+      assert_equal 0, call_count, "Block should not be called until render"
+      table.render
+      assert call_count.positive?, "Block should be called during render"
+    end
+
+    it "style_func is backward compatible with rows/columns params" do
+      style = Style.new
+      table = Table.new
+                   .headers(["A"])
+                   .rows([["1"]])
+                   .style_func(rows: 1, columns: 1) { |_r, _c| style }
+
+      result = strip_ansi(table.render)
+      expected = "╭─╮\n│A│\n├─┤\n│1│\n╰─╯"
+      assert_equal expected, result
+    end
+
+    # ---- Table height ----
+
+    it "pads table to height with blank lines" do
+      table = Table.new
+                   .headers(["X"])
+                   .rows([["Y"]])
+                   .height(8)
+
+      result = table.render
+      lines = result.split("\n")
+      assert_equal 8, lines.length, "Table should have exactly 8 lines"
+    end
+
+    it "truncates table to height" do
+      table = Table.new
+                   .headers(["X"])
+                   .rows([["A"], ["B"], ["C"], ["D"]])
+                   .height(4)
+
+      result = table.render
+      lines = result.split("\n")
+      assert_equal 4, lines.length, "Table should be truncated to 4 lines"
+    end
   end
 end

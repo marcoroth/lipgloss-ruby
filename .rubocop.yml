@@ -12,10 +12,6 @@ Style/StringLiteralsInInterpolation:
 Style/Documentation:
   Enabled: false
 
-Style/GlobalVars:
-  Exclude:
-    - ext/lipgloss/extconf.rb
-
 Metrics/MethodLength:
   Max: 20
 
@@ -23,6 +19,9 @@ Metrics/ClassLength:
   Max: 200
   Exclude:
     - test/**
+
+Metrics/ModuleLength:
+  Max: 100
 
 Metrics/BlockLength:
   Max: 50
@@ -33,12 +32,34 @@ Metrics/CyclomaticComplexity:
 Metrics/ParameterLists:
   Max: 10
 
+Naming/MethodParameterName:
+  AllowedNames:
+    - n
+    - r
+    - g
+    - b
+    - t
+    - x
+    - y
+    - z
+    - l
+    - u
+    - v
+    - h
+    - c
+    - w
+    - c1
+    - c2
+    - r1
+    - g1
+    - b1
+    - r2
+    - g2
+    - b2
+    - cc
+
 Layout/LineLength:
   Enabled: false
-
-Security/Eval:
-  Exclude:
-    - Rakefile
 
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true
