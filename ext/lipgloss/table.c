@@ -40,29 +40,49 @@ static VALUE table_initialize(VALUE self) {
   return self;
 }
 
+static VALUE table_cells_to_s(VALUE cells) {
+  Check_Type(cells, T_ARRAY);
+
+  long length = RARRAY_LEN(cells);
+  VALUE result = rb_ary_new_capa(length);
+
+  for (long index = 0; index < length; index++) {
+    rb_ary_push(result, rb_obj_as_string(rb_ary_entry(cells, index)));
+  }
+
+  return result;
+}
+
+static VALUE table_rows_to_s(VALUE rows) {
+  Check_Type(rows, T_ARRAY);
+
+  long length = RARRAY_LEN(rows);
+  VALUE result = rb_ary_new_capa(length);
+
+  for (long index = 0; index < length; index++) {
+    rb_ary_push(result, table_cells_to_s(rb_ary_entry(rows, index)));
+  }
+
+  return result;
+}
+
 static VALUE table_headers(VALUE self, VALUE headers) {
   GET_TABLE(self, table);
-  Check_Type(headers, T_ARRAY);
-
-  VALUE json_str = rb_funcall(headers, rb_intern("to_json"), 0);
+  VALUE json_str = rb_funcall(table_cells_to_s(headers), rb_intern("to_json"), 0);
   unsigned long long new_handle = lipgloss_table_headers(table->handle, StringValueCStr(json_str));
   return table_wrap(rb_class_of(self), new_handle);
 }
 
 static VALUE table_row(VALUE self, VALUE row) {
   GET_TABLE(self, table);
-  Check_Type(row, T_ARRAY);
-
-  VALUE json_str = rb_funcall(row, rb_intern("to_json"), 0);
+  VALUE json_str = rb_funcall(table_cells_to_s(row), rb_intern("to_json"), 0);
   unsigned long long new_handle = lipgloss_table_row(table->handle, StringValueCStr(json_str));
   return table_wrap(rb_class_of(self), new_handle);
 }
 
 static VALUE table_rows(VALUE self, VALUE rows) {
   GET_TABLE(self, table);
-  Check_Type(rows, T_ARRAY);
-
-  VALUE json_str = rb_funcall(rows, rb_intern("to_json"), 0);
+  VALUE json_str = rb_funcall(table_rows_to_s(rows), rb_intern("to_json"), 0);
   unsigned long long new_handle = lipgloss_table_rows(table->handle, StringValueCStr(json_str));
 
   return table_wrap(rb_class_of(self), new_handle);

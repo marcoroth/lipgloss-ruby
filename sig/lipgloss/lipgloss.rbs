@@ -119,9 +119,9 @@ module Lipgloss
 
   class Table
     def initialize: () -> void
-    def headers: (Array[String] headers) -> Table
-    def row: (Array[String] row) -> Table
-    def rows: (Array[Array[String]] rows) -> Table
+    def headers: (Array[_ToS] headers) -> Table
+    def row: (Array[_ToS] row) -> Table
+    def rows: (Array[Array[_ToS]] rows) -> Table
     def border: (Symbol border_type) -> Table
     def border_style: (Style style) -> Table
     def border_top: (bool value) -> Table
