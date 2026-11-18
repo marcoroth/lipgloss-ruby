@@ -10,6 +10,9 @@ module Lipgloss
   def self._place_horizontal: (Integer width, Float position, String string) -> String
   def self._place_vertical: (Integer height, Float position, String string) -> String
   def self.has_dark_background?: () -> bool
+  def self.has_dark_background=: (bool dark) -> bool
+  def self._color_profile: () -> Integer
+  def self._set_color_profile: (Integer profile) -> Integer
   def self.upstream_version: () -> String
   def self.version: () -> String
 

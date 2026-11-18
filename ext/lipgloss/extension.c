@@ -150,6 +150,20 @@ static VALUE lipgloss_has_dark_background_rb(VALUE self) {
   return lipgloss_has_dark_background() ? Qtrue : Qfalse;
 }
 
+static VALUE lipgloss_color_profile_rb(VALUE self) {
+  return INT2NUM(lipgloss_color_profile());
+}
+
+static VALUE lipgloss_set_color_profile_rb(VALUE self, VALUE profile) {
+  lipgloss_set_color_profile(NUM2INT(profile));
+  return profile;
+}
+
+static VALUE lipgloss_set_has_dark_background_rb(VALUE self, VALUE dark) {
+  lipgloss_set_has_dark_background(RTEST(dark) ? 1 : 0);
+  return dark;
+}
+
 static VALUE lipgloss_upstream_version_rb(VALUE self) {
   char *version = lipgloss_upstream_version();
   VALUE rb_version = rb_utf8_str_new_cstr(version);
@@ -187,6 +201,9 @@ __attribute__((__visibility__("default"))) void Init_lipgloss(void) {
   rb_define_singleton_method(mLipgloss, "_place_horizontal", lipgloss_place_horizontal_rb, 3);
   rb_define_singleton_method(mLipgloss, "_place_vertical", lipgloss_place_vertical_rb, 3);
   rb_define_singleton_method(mLipgloss, "has_dark_background?", lipgloss_has_dark_background_rb, 0);
+  rb_define_singleton_method(mLipgloss, "has_dark_background=", lipgloss_set_has_dark_background_rb, 1);
+  rb_define_singleton_method(mLipgloss, "_color_profile", lipgloss_color_profile_rb, 0);
+  rb_define_singleton_method(mLipgloss, "_set_color_profile", lipgloss_set_color_profile_rb, 1);
   rb_define_singleton_method(mLipgloss, "upstream_version", lipgloss_upstream_version_rb, 0);
   rb_define_singleton_method(mLipgloss, "version", lipgloss_version_rb, 0);
 }

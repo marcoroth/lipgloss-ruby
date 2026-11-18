@@ -176,6 +176,17 @@ color = Lipgloss::CompleteAdaptiveColor.new(light: light, dark: dark)
 style = Lipgloss::Style.new.foreground(color)
 ```
 
+**Color profile:**
+
+Lip Gloss detects how many colors the terminal supports when it first renders. Set the profile to force colors on, for example in CI or golden tests, or off:
+
+```ruby
+Lipgloss.color_profile                # => :true_color, :ansi256, :ansi, or :ascii
+Lipgloss.color_profile = :true_color  # always render colors
+Lipgloss.color_profile = :ascii       # never render colors
+Lipgloss.has_dark_background = true   # pick the dark variant of adaptive colors
+```
+
 ### Style Inheritance
 
 **Inherit styles from a parent:**
@@ -415,6 +426,9 @@ puts tree.render
 | `Lipgloss.place_horizontal(width, position, string)`      | Place horizontally        |
 | `Lipgloss.place_vertical(height, position, string)`       | Place vertically          |
 | `Lipgloss.has_dark_background?`                           | Check terminal background |
+| `Lipgloss.has_dark_background = bool`                     | Set terminal background   |
+| `Lipgloss.color_profile`                                  | Get the color profile     |
+| `Lipgloss.color_profile = profile`                        | Set the color profile     |
 
 ### Color Blending
 

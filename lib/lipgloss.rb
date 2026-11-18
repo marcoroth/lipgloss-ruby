@@ -34,6 +34,11 @@ module Lipgloss
 
   NO_TAB_CONVERSION = -1 #: Integer
 
+  # @rbs!
+  #   type color_profile = :true_color | :ansi256 | :ansi | :ascii
+
+  COLOR_PROFILES = [:true_color, :ansi256, :ansi, :ascii].freeze #: Array[color_profile]
+
   class << self
     # @rbs position: Position::position_value
     # @rbs *strings: String
@@ -73,6 +78,21 @@ module Lipgloss
     # @rbs return: String
     def place_vertical(height, position, string)
       _place_vertical(height, Position.resolve(position), string)
+    end
+
+    # @rbs return: color_profile
+    def color_profile
+      COLOR_PROFILES.fetch(_color_profile)
+    end
+
+    # @rbs profile: color_profile
+    # @rbs return: void
+    def color_profile=(profile)
+      index = COLOR_PROFILES.index(profile)
+
+      raise ArgumentError, "unknown color profile #{profile.inspect}, expected one of #{COLOR_PROFILES.inspect}" unless index
+
+      _set_color_profile(index)
     end
   end
 end

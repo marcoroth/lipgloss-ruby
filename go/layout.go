@@ -5,6 +5,7 @@ import "C"
 import (
 	"encoding/json"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 )
 
 //export lipgloss_join_horizontal
@@ -110,4 +111,19 @@ func lipgloss_has_dark_background() C.int {
 	}
 
 	return 0
+}
+
+//export lipgloss_color_profile
+func lipgloss_color_profile() C.int {
+	return C.int(lipgloss.ColorProfile())
+}
+
+//export lipgloss_set_color_profile
+func lipgloss_set_color_profile(profile C.int) {
+	lipgloss.SetColorProfile(termenv.Profile(profile))
+}
+
+//export lipgloss_set_has_dark_background
+func lipgloss_set_has_dark_background(dark C.int) {
+	lipgloss.SetHasDarkBackground(dark != 0)
 }
