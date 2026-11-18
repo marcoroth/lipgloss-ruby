@@ -92,6 +92,7 @@ module Lipgloss
 
     def set_string: (String string) -> Style
     def inherit: (Style other) -> Style
+    def _to_json: () -> String
 
     def unset_bold: () -> Style
     def unset_italic: () -> Style

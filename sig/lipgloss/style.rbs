@@ -13,5 +13,8 @@ module Lipgloss
     # @rbs position: Position::position_value
     # @rbs return: Style
     def align_vertical: (Position::position_value position) -> Style
+
+    # @rbs return: Hash[Symbol, untyped]
+    def to_h: () -> Hash[Symbol, untyped]
   end
 end
