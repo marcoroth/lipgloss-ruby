@@ -197,6 +197,18 @@ module Lipgloss
       assert_equal expected, result
     end
 
+    it "renders cells that aren't strings with to_s" do
+      table = Lipgloss::Table.new
+                             .headers(["a", :b, 3])
+                             .rows([["1", 2, 3.5], [true, nil, :sym]])
+                             .row([4, "5", false])
+
+      result = strip_ansi(table.render)
+      expected = "╭────┬─┬─────╮\n│a   │b│3    │\n├────┼─┼─────┤\n│1   │2│3.5  │\n│true│ │sym  │\n│4   │5│false│\n╰────┴─┴─────╯"
+
+      assert_equal expected, result
+    end
+
     it "has HEADER_ROW constant" do
       assert_equal(-1, Lipgloss::Table::HEADER_ROW)
     end
