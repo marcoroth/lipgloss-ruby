@@ -20,5 +20,10 @@ module Lipgloss
     def align_vertical(position)
       _align_vertical(Position.resolve(position))
     end
+
+    # @rbs return: Hash[Symbol, untyped]
+    def to_h
+      JSON.parse(_to_json, symbolize_names: true)
+    end
   end
 end

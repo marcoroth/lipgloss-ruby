@@ -344,6 +344,16 @@ static VALUE style_to_s(VALUE self) {
   return rb_result;
 }
 
+static VALUE style_to_json(VALUE self) {
+  GET_STYLE(self, style);
+  char *result = lipgloss_style_to_json(style->handle);
+  VALUE rb_result = rb_utf8_str_new_cstr(result);
+
+  lipgloss_free(result);
+
+  return rb_result;
+}
+
 // Getter methods
 
 static VALUE style_get_bold(VALUE self) {
@@ -455,6 +465,7 @@ void Init_lipgloss_style(void) {
   rb_define_method(cStyle, "set_string", style_set_string, 1);
   rb_define_method(cStyle, "inherit", style_inherit, 1);
   rb_define_method(cStyle, "to_s", style_to_s, 0);
+  rb_define_method(cStyle, "_to_json", style_to_json, 0);
 
   rb_define_method(cStyle, "bold?", style_get_bold, 0);
   rb_define_method(cStyle, "italic?", style_get_italic, 0);
