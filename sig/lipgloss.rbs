@@ -27,6 +27,10 @@ module Lipgloss
 
   NO_TAB_CONVERSION: Integer
 
+  type color_profile = :true_color | :ansi256 | :ansi | :ascii
+
+  COLOR_PROFILES: Array[color_profile]
+
   # @rbs position: Position::position_value
   # @rbs *strings: String
   # @rbs return: String
@@ -56,4 +60,11 @@ module Lipgloss
   # @rbs string: String
   # @rbs return: String
   def self.place_vertical: (Integer height, Position::position_value position, String string) -> String
+
+  # @rbs return: color_profile
+  def self.color_profile: () -> color_profile
+
+  # @rbs profile: color_profile
+  # @rbs return: void
+  def self.color_profile=: (color_profile profile) -> void
 end
