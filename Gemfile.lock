@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    lipgloss (0.2.2)
+    lipgloss (0.2.3)
 
 GEM
   remote: https://rubygems.org/

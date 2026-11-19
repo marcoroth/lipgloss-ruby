@@ -2,5 +2,5 @@
 # rbs_inline: enabled
 
 module Lipgloss
-  VERSION = "0.2.2" #: String
+  VERSION = "0.2.3" #: String
 end
