@@ -92,6 +92,23 @@ module Lipgloss
       assert_equal expected, result
     end
 
+    it "applies the enumerator style to nested indentation" do
+      style = Lipgloss::Style.new.foreground("5")
+      tree = Lipgloss::Tree.root("Root")
+                           .child("A", Lipgloss::Tree.root("B").child("C"))
+                           .enumerator_style(style)
+
+      previous = Lipgloss.color_profile
+      Lipgloss.color_profile = :ansi
+
+      result = tree.render
+
+      assert_equal "Root\n├──A\n└──B\n   └──C", strip_ansi(result)
+      assert_includes result, "\e[35m   \e[m"
+    ensure
+      Lipgloss.color_profile = previous if previous
+    end
+
     it "renders with item style" do
       style = Lipgloss::Style.new.italic(true)
       tree = Lipgloss::Tree.root("Root")

@@ -5,7 +5,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 //export lipgloss_style_border
@@ -110,13 +110,13 @@ func lipgloss_style_border_custom(id C.ulonglong, top, bottom, left, right, topL
 
 //export lipgloss_style_border_foreground
 func lipgloss_style_border_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderForeground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderForeground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_foreground_adaptive
 func lipgloss_style_border_foreground_adaptive(id C.ulonglong, light *C.char, dark *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderForeground(lipgloss.AdaptiveColor{
+	style := getStyle(uint64(id)).BorderForeground(adaptiveColor{
 		Light: C.GoString(light),
 		Dark:  C.GoString(dark),
 	})
@@ -126,13 +126,13 @@ func lipgloss_style_border_foreground_adaptive(id C.ulonglong, light *C.char, da
 
 //export lipgloss_style_border_background
 func lipgloss_style_border_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_background_adaptive
 func lipgloss_style_border_background_adaptive(id C.ulonglong, light *C.char, dark *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderBackground(lipgloss.AdaptiveColor{
+	style := getStyle(uint64(id)).BorderBackground(adaptiveColor{
 		Light: C.GoString(light),
 		Dark:  C.GoString(dark),
 	})
@@ -168,25 +168,25 @@ func lipgloss_style_border_left(id C.ulonglong, value C.int) C.ulonglong {
 
 //export lipgloss_style_border_top_foreground
 func lipgloss_style_border_top_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderTopForeground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderTopForeground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_right_foreground
 func lipgloss_style_border_right_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderRightForeground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderRightForeground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_bottom_foreground
 func lipgloss_style_border_bottom_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderBottomForeground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderBottomForeground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_left_foreground
 func lipgloss_style_border_left_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderLeftForeground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderLeftForeground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
@@ -194,24 +194,24 @@ func lipgloss_style_border_left_foreground(id C.ulonglong, color *C.char) C.ulon
 
 //export lipgloss_style_border_top_background
 func lipgloss_style_border_top_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderTopBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderTopBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_right_background
 func lipgloss_style_border_right_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderRightBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderRightBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_bottom_background
 func lipgloss_style_border_bottom_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderBottomBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderBottomBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_border_left_background
 func lipgloss_style_border_left_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).BorderLeftBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).BorderLeftBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }

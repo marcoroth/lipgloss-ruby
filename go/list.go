@@ -3,8 +3,8 @@ package main
 import "C"
 
 import (
+	lipglosslist "charm.land/lipgloss/v2/list"
 	"encoding/json"
-	lipglosslist "github.com/charmbracelet/lipgloss/list"
 )
 
 func allocList(list *lipglosslist.List) uint64 {
@@ -114,5 +114,5 @@ func lipgloss_list_item_style(id C.ulonglong, styleID C.ulonglong) C.ulonglong {
 func lipgloss_list_render(id C.ulonglong) *C.char {
 	list := getList(uint64(id))
 
-	return C.CString(list.String())
+	return C.CString(downsample(list.String()))
 }

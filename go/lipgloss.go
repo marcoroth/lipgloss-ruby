@@ -6,10 +6,10 @@ package main
 import "C"
 
 import (
-	"github.com/charmbracelet/lipgloss"
-	lipglosslist "github.com/charmbracelet/lipgloss/list"
-	lipglosstable "github.com/charmbracelet/lipgloss/table"
-	lipglosstree "github.com/charmbracelet/lipgloss/tree"
+	"charm.land/lipgloss/v2"
+	lipglosslist "charm.land/lipgloss/v2/list"
+	lipglosstable "charm.land/lipgloss/v2/table"
+	lipglosstree "charm.land/lipgloss/v2/tree"
 	"runtime/debug"
 	"sync"
 	"unsafe"
@@ -67,7 +67,7 @@ func lipgloss_upstream_version() *C.char {
 	}
 
 	for _, dep := range info.Deps {
-		if dep.Path == "github.com/charmbracelet/lipgloss" {
+		if dep.Path == "charm.land/lipgloss/v2" {
 			return C.CString(dep.Version)
 		}
 	}

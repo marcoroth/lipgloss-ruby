@@ -3,8 +3,8 @@ package main
 import "C"
 
 import (
+	lipglosstree "charm.land/lipgloss/v2/tree"
 	"encoding/json"
-	lipglosstree "github.com/charmbracelet/lipgloss/tree"
 )
 
 func allocTree(tree *lipglosstree.Tree) uint64 {
@@ -102,7 +102,8 @@ func lipgloss_tree_enumerator(id C.ulonglong, enumType C.int) C.ulonglong {
 //export lipgloss_tree_enumerator_style
 func lipgloss_tree_enumerator_style(id C.ulonglong, styleID C.ulonglong) C.ulonglong {
 	style := getStyle(uint64(styleID))
-	tree := getTree(uint64(id)).EnumeratorStyle(style)
+	// v1 styled the indentation with the enumerator style; v2 splits them.
+	tree := getTree(uint64(id)).EnumeratorStyle(style).IndenterStyle(style)
 
 	return C.ulonglong(allocTree(tree))
 }
@@ -134,5 +135,5 @@ func lipgloss_tree_offset(id C.ulonglong, start C.int, end C.int) C.ulonglong {
 func lipgloss_tree_render(id C.ulonglong) *C.char {
 	tree := getTree(uint64(id))
 
-	return C.CString(tree.String())
+	return C.CString(downsample(tree.String()))
 }
