@@ -3,9 +3,10 @@ package main
 import "C"
 
 import (
+	"image/color"
 	"unsafe"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 func allocStyle(style lipgloss.Style) uint64 {
@@ -41,7 +42,7 @@ func lipgloss_style_render(id C.ulonglong, text *C.char) *C.char {
 	style := getStyle(uint64(id))
 	result := style.Render(C.GoString(text))
 
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 // Text formatting methods
@@ -92,19 +93,19 @@ func lipgloss_style_faint(id C.ulonglong, value C.int) C.ulonglong {
 
 //export lipgloss_style_foreground
 func lipgloss_style_foreground(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Foreground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).Foreground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_background
 func lipgloss_style_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Background(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).Background(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }
 
 //export lipgloss_style_foreground_adaptive
 func lipgloss_style_foreground_adaptive(id C.ulonglong, light *C.char, dark *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Foreground(lipgloss.AdaptiveColor{
+	style := getStyle(uint64(id)).Foreground(adaptiveColor{
 		Light: C.GoString(light),
 		Dark:  C.GoString(dark),
 	})
@@ -114,7 +115,7 @@ func lipgloss_style_foreground_adaptive(id C.ulonglong, light *C.char, dark *C.c
 
 //export lipgloss_style_background_adaptive
 func lipgloss_style_background_adaptive(id C.ulonglong, light *C.char, dark *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Background(lipgloss.AdaptiveColor{
+	style := getStyle(uint64(id)).Background(adaptiveColor{
 		Light: C.GoString(light),
 		Dark:  C.GoString(dark),
 	})
@@ -124,7 +125,7 @@ func lipgloss_style_background_adaptive(id C.ulonglong, light *C.char, dark *C.c
 
 //export lipgloss_style_foreground_complete
 func lipgloss_style_foreground_complete(id C.ulonglong, trueColor *C.char, ansi256 *C.char, ansi *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Foreground(lipgloss.CompleteColor{
+	style := getStyle(uint64(id)).Foreground(completeColor{
 		TrueColor: C.GoString(trueColor),
 		ANSI256:   C.GoString(ansi256),
 		ANSI:      C.GoString(ansi),
@@ -135,7 +136,7 @@ func lipgloss_style_foreground_complete(id C.ulonglong, trueColor *C.char, ansi2
 
 //export lipgloss_style_background_complete
 func lipgloss_style_background_complete(id C.ulonglong, trueColor *C.char, ansi256 *C.char, ansi *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Background(lipgloss.CompleteColor{
+	style := getStyle(uint64(id)).Background(completeColor{
 		TrueColor: C.GoString(trueColor),
 		ANSI256:   C.GoString(ansi256),
 		ANSI:      C.GoString(ansi),
@@ -146,13 +147,13 @@ func lipgloss_style_background_complete(id C.ulonglong, trueColor *C.char, ansi2
 
 //export lipgloss_style_foreground_complete_adaptive
 func lipgloss_style_foreground_complete_adaptive(id C.ulonglong, lightTrue *C.char, lightAnsi256 *C.char, lightAnsi *C.char, darkTrue *C.char, darkAnsi256 *C.char, darkAnsi *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Foreground(lipgloss.CompleteAdaptiveColor{
-		Light: lipgloss.CompleteColor{
+	style := getStyle(uint64(id)).Foreground(completeAdaptiveColor{
+		Light: completeColor{
 			TrueColor: C.GoString(lightTrue),
 			ANSI256:   C.GoString(lightAnsi256),
 			ANSI:      C.GoString(lightAnsi),
 		},
-		Dark: lipgloss.CompleteColor{
+		Dark: completeColor{
 			TrueColor: C.GoString(darkTrue),
 			ANSI256:   C.GoString(darkAnsi256),
 			ANSI:      C.GoString(darkAnsi),
@@ -164,13 +165,13 @@ func lipgloss_style_foreground_complete_adaptive(id C.ulonglong, lightTrue *C.ch
 
 //export lipgloss_style_background_complete_adaptive
 func lipgloss_style_background_complete_adaptive(id C.ulonglong, lightTrue *C.char, lightAnsi256 *C.char, lightAnsi *C.char, darkTrue *C.char, darkAnsi256 *C.char, darkAnsi *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).Background(lipgloss.CompleteAdaptiveColor{
-		Light: lipgloss.CompleteColor{
+	style := getStyle(uint64(id)).Background(completeAdaptiveColor{
+		Light: completeColor{
 			TrueColor: C.GoString(lightTrue),
 			ANSI256:   C.GoString(lightAnsi256),
 			ANSI:      C.GoString(lightAnsi),
 		},
-		Dark: lipgloss.CompleteColor{
+		Dark: completeColor{
 			TrueColor: C.GoString(darkTrue),
 			ANSI256:   C.GoString(darkAnsi256),
 			ANSI:      C.GoString(darkAnsi),
@@ -277,7 +278,7 @@ func lipgloss_style_inherit(id C.ulonglong, inheritFromID C.ulonglong) C.ulonglo
 //export lipgloss_style_string
 func lipgloss_style_string(id C.ulonglong) *C.char {
 	style := getStyle(uint64(id))
-	return C.CString(style.String())
+	return C.CString(downsample(style.String()))
 }
 
 // Getter methods
@@ -345,20 +346,10 @@ func lipgloss_style_get_faint(id C.ulonglong) C.int {
 	return 0
 }
 
-// terminalColorToString converts a TerminalColor to its string representation
-func terminalColorToString(tc lipgloss.TerminalColor) string {
-	if tc == nil {
-		return ""
-	}
-	switch c := tc.(type) {
-	case lipgloss.Color:
-		return string(c)
-	case lipgloss.NoColor:
-		return ""
-	default:
-		// For adaptive/complete colors, we can't easily extract a single value
-		return ""
-	}
+// terminalColorToString converts a color to the string it was set with.
+// Adaptive and complete colors have no single value and return "".
+func terminalColorToString(c color.Color) string {
+	return colorString(c)
 }
 
 //export lipgloss_style_get_foreground

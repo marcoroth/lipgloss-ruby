@@ -3,7 +3,6 @@ package main
 import "C"
 
 import (
-	"github.com/charmbracelet/lipgloss"
 	"unsafe"
 )
 
@@ -89,6 +88,6 @@ func lipgloss_style_margin_left(id C.ulonglong, value C.int) C.ulonglong {
 
 //export lipgloss_style_margin_background
 func lipgloss_style_margin_background(id C.ulonglong, color *C.char) C.ulonglong {
-	style := getStyle(uint64(id)).MarginBackground(lipgloss.Color(C.GoString(color)))
+	style := getStyle(uint64(id)).MarginBackground(parseColor(C.GoString(color)))
 	return C.ulonglong(allocStyle(style))
 }

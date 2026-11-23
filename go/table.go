@@ -3,10 +3,10 @@ package main
 import "C"
 
 import (
+	"charm.land/lipgloss/v2"
+	lipglosstable "charm.land/lipgloss/v2/table"
 	"encoding/json"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	lipglosstable "github.com/charmbracelet/lipgloss/table"
 )
 
 func allocTable(table *lipglosstable.Table) uint64 {
@@ -27,7 +27,8 @@ func getTable(id uint64) *lipglosstable.Table {
 
 //export lipgloss_table_new
 func lipgloss_table_new() C.ulonglong {
-	return C.ulonglong(allocTable(lipglosstable.New()))
+	// v2 defaults to the normal border; keep v1's rounded default.
+	return C.ulonglong(allocTable(lipglosstable.New().Border(lipgloss.RoundedBorder())))
 }
 
 //export lipgloss_table_free
@@ -173,7 +174,7 @@ func lipgloss_table_height(id C.ulonglong, height C.int) C.ulonglong {
 
 //export lipgloss_table_offset
 func lipgloss_table_offset(id C.ulonglong, offset C.int) C.ulonglong {
-	table := getTable(uint64(id)).Offset(int(offset))
+	table := getTable(uint64(id)).YOffset(int(offset))
 	return C.ulonglong(allocTable(table))
 }
 
@@ -192,7 +193,7 @@ func lipgloss_table_clear_rows(id C.ulonglong) C.ulonglong {
 //export lipgloss_table_render
 func lipgloss_table_render(id C.ulonglong) *C.char {
 	table := getTable(uint64(id))
-	return C.CString(table.Render())
+	return C.CString(downsample(table.Render()))
 }
 
 //export lipgloss_table_style_func

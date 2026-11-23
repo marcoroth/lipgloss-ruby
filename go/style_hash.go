@@ -4,30 +4,33 @@ import "C"
 
 import (
 	"encoding/json"
+	"image/color"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
-func colorToValue(tc lipgloss.TerminalColor) any {
-	switch c := tc.(type) {
-	case nil, lipgloss.NoColor:
-		return nil
-	case lipgloss.Color:
-		if c == "" {
-			return nil
-		}
-		return string(c)
-	case lipgloss.AdaptiveColor:
-		return map[string]any{"light": c.Light, "dark": c.Dark}
-	case lipgloss.CompleteColor:
-		return map[string]any{"true_color": c.TrueColor, "ansi256": c.ANSI256, "ansi": c.ANSI}
-	case lipgloss.CompleteAdaptiveColor:
+func colorToValue(c color.Color) any {
+	switch v := c.(type) {
+	case adaptiveColor:
+		return map[string]any{"light": v.Light, "dark": v.Dark}
+	case completeColor:
+		return completeColorToValue(v)
+	case completeAdaptiveColor:
 		return map[string]any{
-			"light": map[string]any{"true_color": c.Light.TrueColor, "ansi256": c.Light.ANSI256, "ansi": c.Light.ANSI},
-			"dark":  map[string]any{"true_color": c.Dark.TrueColor, "ansi256": c.Dark.ANSI256, "ansi": c.Dark.ANSI},
+			"light": completeColorToValue(v.Light),
+			"dark":  completeColorToValue(v.Dark),
 		}
 	}
+
+	if s := colorString(c); s != "" {
+		return s
+	}
+
 	return nil
+}
+
+func completeColorToValue(c completeColor) map[string]any {
+	return map[string]any{"true_color": c.TrueColor, "ansi256": c.ANSI256, "ansi": c.ANSI}
 }
 
 func borderToValue(b lipgloss.Border) map[string]any {

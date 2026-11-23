@@ -3,9 +3,8 @@ package main
 import "C"
 
 import (
+	"charm.land/lipgloss/v2"
 	"encoding/json"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
 )
 
 //export lipgloss_join_horizontal
@@ -18,7 +17,7 @@ func lipgloss_join_horizontal(position C.double, stringsJSON *C.char) *C.char {
 
 	result := lipgloss.JoinHorizontal(lipgloss.Position(position), strings...)
 
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_join_vertical
@@ -31,7 +30,7 @@ func lipgloss_join_vertical(position C.double, stringsJSON *C.char) *C.char {
 
 	result := lipgloss.JoinVertical(lipgloss.Position(position), strings...)
 
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_width
@@ -47,7 +46,7 @@ func lipgloss_height(text *C.char) C.int {
 //export lipgloss_place
 func lipgloss_place(width C.int, height C.int, horizontalPosition C.double, verticalPosition C.double, text *C.char) *C.char {
 	result := lipgloss.Place(int(width), int(height), lipgloss.Position(horizontalPosition), lipgloss.Position(verticalPosition), C.GoString(text))
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_place_with_whitespace
@@ -61,11 +60,11 @@ func lipgloss_place_with_whitespace(width C.int, height C.int, horizontalPositio
 
 	wsFg := C.GoString(whitespaceForeground)
 	if wsFg != "" {
-		opts = append(opts, lipgloss.WithWhitespaceForeground(lipgloss.Color(wsFg)))
+		opts = append(opts, lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Foreground(parseColor(wsFg))))
 	}
 
 	result := lipgloss.Place(int(width), int(height), lipgloss.Position(horizontalPosition), lipgloss.Position(verticalPosition), C.GoString(text), opts...)
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_place_with_whitespace_adaptive
@@ -81,32 +80,32 @@ func lipgloss_place_with_whitespace_adaptive(width C.int, height C.int, horizont
 	wsFgDark := C.GoString(whitespaceForegroundDark)
 
 	if wsFgLight != "" || wsFgDark != "" {
-		opts = append(opts, lipgloss.WithWhitespaceForeground(lipgloss.AdaptiveColor{
+		opts = append(opts, lipgloss.WithWhitespaceStyle(lipgloss.NewStyle().Foreground(adaptiveColor{
 			Light: wsFgLight,
 			Dark:  wsFgDark,
-		}))
+		})))
 	}
 
 	result := lipgloss.Place(int(width), int(height), lipgloss.Position(horizontalPosition), lipgloss.Position(verticalPosition), C.GoString(text), opts...)
 
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_place_horizontal
 func lipgloss_place_horizontal(width C.int, position C.double, text *C.char) *C.char {
 	result := lipgloss.PlaceHorizontal(int(width), lipgloss.Position(position), C.GoString(text))
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_place_vertical
 func lipgloss_place_vertical(height C.int, position C.double, text *C.char) *C.char {
 	result := lipgloss.PlaceVertical(int(height), lipgloss.Position(position), C.GoString(text))
-	return C.CString(result)
+	return C.CString(downsample(result))
 }
 
 //export lipgloss_has_dark_background
 func lipgloss_has_dark_background() C.int {
-	if lipgloss.HasDarkBackground() {
+	if hasDarkBackground() {
 		return 1
 	}
 
@@ -115,15 +114,15 @@ func lipgloss_has_dark_background() C.int {
 
 //export lipgloss_color_profile
 func lipgloss_color_profile() C.int {
-	return C.int(lipgloss.ColorProfile())
+	return C.int(profileToRuby(currentProfile()))
 }
 
 //export lipgloss_set_color_profile
 func lipgloss_set_color_profile(profile C.int) {
-	lipgloss.SetColorProfile(termenv.Profile(profile))
+	setProfile(profileFromRuby(int(profile)))
 }
 
 //export lipgloss_set_has_dark_background
 func lipgloss_set_has_dark_background(dark C.int) {
-	lipgloss.SetHasDarkBackground(dark != 0)
+	setHasDarkBackground(dark != 0)
 }
